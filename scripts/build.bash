@@ -113,6 +113,10 @@ cmake ../..
 make -j $NCPU
 sudo make install
 
+# If we're reclaiming space, run tests now since we won't be able to
+# later
+test "$1" = "-reclaim" && (ctest3 || ctest)
+
 # Reclaim space if argument specified.  Probably a good idea for
 # Docker images, not such a good idea otherwise.
 test "$1" = "-reclaim" && rm -rf $(cd $DIR/.. && pwd)
