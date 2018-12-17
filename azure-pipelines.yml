@@ -16,3 +16,5 @@ steps:
     ./scripts/build.bash
     
   displayName: 'make'
+
+timeoutInMinutes: 360
