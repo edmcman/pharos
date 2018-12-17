@@ -36,7 +36,6 @@ then
    tar -xjf boost_1_64_0.tar.bz2
    cd boost_1_64_0
    ./bootstrap.sh --prefix=/usr/local --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave
-   ./b2 clean
    sudo ./b2 -j $NCPU toolset=gcc cxxflags="-std=c++11" install
    test "$1" = "-reclaim" && rm -rf $DIR/boost_1_64_0
 fi
