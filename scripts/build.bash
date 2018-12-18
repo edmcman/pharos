@@ -76,6 +76,7 @@ git clone https://github.com/rose-compiler/rose-develop rose
 cd rose
 git checkout d3eaef2ad21687c294827d4471f2b0163af86978
 
+#  CXXFLAGS='-std=c++11 --param ggc-min-expand=1 --param ggc-min-heapsize=32768' \
 ./build
 mkdir release
 cd release
@@ -83,7 +84,7 @@ cd release
   --enable-languages=binaries --enable-projects-directory \
   --disable-tutorial-directory --disable-boost-version-check \
   --with-boost=/usr/local \
-  CXXFLAGS='-std=c++11 --param ggc-min-expand=1 --param ggc-min-heapsize=32768' \
+  CXXFLAGS='-std=c++11' \
   --with-yaml=/usr/local \
   --with-z3=/usr/local
 make -j $NCPU
