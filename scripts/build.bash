@@ -84,10 +84,11 @@ cd release
   --enable-languages=binaries --enable-projects-directory \
   --disable-tutorial-directory --disable-boost-version-check \
   --with-boost=/usr/local \
-  CXXFLAGS='-std=c++11' \
+  CXXFLAGS='-std=c++11 --param ggc-min-expand=20' \
   --with-yaml=/usr/local \
   --with-z3=/usr/local
-make -j $NCPU
+make -k -j $NCPU
+make
 sudo make -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/rose
 
