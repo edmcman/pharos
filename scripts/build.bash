@@ -84,7 +84,7 @@ cd release
   --enable-languages=binaries --enable-projects-directory \
   --disable-tutorial-directory --disable-boost-version-check \
   --with-boost=/usr/local \
-  CXXFLAGS='-std=c++11 --param ggc-min-expand=10 --param ggc-min-heapsize=32768' \
+  CXXFLAGS='-std=c++11 --param ggc-min-expand=5 --param ggc-min-heapsize=32768' \
   --with-yaml=/usr/local \
   --with-z3=/usr/local
 make -k -j $NCPU
