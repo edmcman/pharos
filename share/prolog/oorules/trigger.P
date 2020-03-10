@@ -43,9 +43,9 @@ dispatchTrigger(factVFTableEntry(VFTable, _Offset, Entry), Out) :-
     setof(DerivedClass,
           AncestorVFTable^DerivedVFTable^Method^AncestorClass^AncestorConstructor^DerivedConstructor^((AncestorVFTable=VFTable;DerivedVFTable=VFTable),
                                                                                                       reasonClassHasUnknownBase_C(DerivedClass, AncestorVFTable, DerivedVFTable, Entry, Method, AncestorClass, AncestorConstructor, DerivedConstructor),
-           not(factClassHasUnknownBase(Class)),
-           not(factClassHasNoBase(Class)),
-           loginfo('Concluding factClassHasUnknownBase('), loginfo(Class), loginfoln(').')),
+                                                                                                      not(factClassHasUnknownBase(Class)),
+                                                                                                      not(factClassHasNoBase(Class)),
+                                                                                                      loginfo('Concluding factClassHasUnknownBase_C('), loginfo(Class), loginfoln(').')),
           ClassSets),
     maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
     Out = all(ActionSets).
@@ -55,9 +55,9 @@ dispatchTrigger(findint(FindMethod, FindClass), Out) :-
           AncestorVFTable^DerivedVFTable^Entry^AncestorClass^AncestorConstructor^DerivedConstructor^((FindClass=DerivedClass;FindClass=AncestorClass),
                                                                                                      (FindMethod=Method;FindMethod=AncestorConstructor;FindMethod=DerivedConstructor),
                                                                                                      reasonClassHasUnknownBase_C(DerivedClass, AncestorVFTable, DerivedVFTable, Entry, Method, AncestorClass, AncestorConstructor, DerivedConstructor),
-           not(factClassHasUnknownBase(Class)),
-           not(factClassHasNoBase(Class)),
-           loginfo('Concluding factClassHasUnknownBase('), loginfo(Class), loginfoln(').')),
+                                                                                                     not(factClassHasUnknownBase(Class)),
+                                                                                                     not(factClassHasNoBase(Class)),
+                                                                                                     loginfo('Concluding factClassHasUnknownBase_C('), loginfo(Class), loginfoln(').')),
           ClassSets),
     maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
     Out = all(ActionSets).
@@ -68,7 +68,7 @@ dispatchTrigger(factConstructor(Constructor), Out) :-
                                                                                                             reasonClassHasUnknownBase_C(DerivedClass, AncestorVFTable, DerivedVFTable, Entry, Method, AncestorClass, AncestorConstructor, DerivedConstructor),
                                                                                                             not(factClassHasUnknownBase(Class)),
                                                                                                             not(factClassHasNoBase(Class)),
-                                                                                                            loginfo('Concluding factClassHasUnknownBase('), loginfo(Class), loginfoln(').')),
+                                                                                                            loginfo('Concluding factClassHasUnknownBase_C('), loginfo(Class), loginfoln(').')),
           ClassSets),
     maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
     Out = all(ActionSets).
@@ -80,7 +80,7 @@ dispatchTrigger(factVFTableWrite(_Insn, Constructor, _Offset, VFTable), Out) :-
                                                                                                             reasonClassHasUnknownBase_C(DerivedClass, AncestorVFTable, DerivedVFTable, Entry, Method, AncestorClass, AncestorConstructor, DerivedConstructor),
                                                                                                             not(factClassHasUnknownBase(Class)),
                                                                                                             not(factClassHasNoBase(Class)),
-                                                                                                            loginfo('Concluding factClassHasUnknownBase('), loginfo(Class), loginfoln(').')),
+                                                                                                            loginfo('Concluding factClassHasUnknownBase_C('), loginfo(Class), loginfoln(').')),
           ClassSets),
     maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
     Out = all(ActionSets).
