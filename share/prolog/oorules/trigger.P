@@ -88,9 +88,9 @@ dispatchTrigger(factClassSizeGTE(Class1,GTESize), Out) :-
 concludeTrigger(Out) :-
     setof(X,
           (trigger_fact(X),
-           logtrace('Processing trigger fact... '), logtraceln(X),
-           retract(trigger_fact(X))),
+           logtrace('Processing trigger fact... '), logtraceln(X)),
           Facts),
+    retractall(trigger_fact(_)),
     !,
 
     setof(OutTemp,
