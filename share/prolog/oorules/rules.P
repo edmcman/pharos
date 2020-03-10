@@ -1486,7 +1486,7 @@ reasonClassHasNoBaseSet(Set) :-
 :- table reasonClassHasUnknownBase/1 as incremental.
 :- table reasonClassHasUnknownBase_A/1 as incremental.
 :- table reasonClassHasUnknownBase_B/1 as incremental.
-:- table reasonClassHasUnknownBase_C/1 as incremental.
+:- table reasonClassHasUnknownBase_C/8 as incremental.
 :- table reasonClassHasUnknownBase_D/1 as incremental.
 :- table reasonClassHasUnknownBase_E/3 as incremental.
 
@@ -1494,7 +1494,8 @@ reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
     or([reasonClassHasUnknownBase_A(Class),
         reasonClassHasUnknownBase_B(Class),
-        reasonClassHasUnknownBase_C(Class),
+        % in trigger.P
+        %reasonClassHasUnknownBase_C(Class),
         reasonClassHasUnknownBase_D(Class)
         % in trigger.P
         %reasonClassHasUnknownBase_E(Class)
@@ -1519,7 +1520,7 @@ reasonClassHasUnknownBase_B(Class) :-
 % base class as well.
 % PAPER: Relate-6
 % ED_PAPER_INTERESTING
-reasonClassHasUnknownBase_C(DerivedClass) :-
+reasonClassHasUnknownBase_C(DerivedClass, AncestorVFTable, DerivedVFTable, Entry, Method, AncestorClass, AncestorConstructor, DerivedConstructor) :-
     % And there's a method that appears in two different VFTables...  During the thunk
     % conversion Cory chose to make the VFTable entries match exactly, but it's possible that
     % we really mean any two entries that dethunk to the same actual method.
