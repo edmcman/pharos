@@ -295,7 +295,8 @@ retract_helper(trigger_fact(X)) :-
     % point which messes up backtracking.  Thus we need another cut here.
     !.
 retract_helper(X) :-
-    incr_retract(X).
+    % In SWI Prolog, retract can have open choice points as a result of index/hash collisions.
+    once(incr_retract(X)).
 
 try_assert(X) :- X, !.
 try_assert(X) :- try_assert_real(X).
