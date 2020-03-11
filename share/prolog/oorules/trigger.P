@@ -41,7 +41,7 @@ trigger_hook(_X).
 % factVFTableEntry: VFTable could be AncestorVFTable or DerivedVFTable
 dispatchTrigger(factVFTableEntry(VFTable, _Offset, Entry), Out) :-
     setof(DerivedClass,
-          AncestorVFTable^DerivedVFTable^Method^((AncestorVFTable=VFTable;DerivedVFTable=VFTable),
+          AncestorVFTable^DerivedVFTable^Entry^((AncestorVFTable=VFTable;DerivedVFTable=VFTable),
                                                  reasonClassHasUnknownBase_C1(DerivedClass, AncestorVFTable, DerivedVFTable, Entry),
                                                  not(factClassHasUnknownBase(Class)),
                                                  not(factClassHasNoBase(Class)),
