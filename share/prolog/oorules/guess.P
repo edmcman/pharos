@@ -811,7 +811,20 @@ guessMergeClasses(Out) :-
 % VFTable, and there's nothing contradictory, try assigning the call to the class that it was
 % resolved through.  Technically, I think this is a case of choosing arbitrarily between
 % multiple valid solutions.  It might be possible to prove which constructor the method is on.
+
+% This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
+% putting it in a separate fact, we can make it a trigger-based fact that is maintained with
+% low overhead.
+:- dynamic factMethodInVFTable/2 as incremental.
+
+:- table reasonMethodInVFTable/3 as incremental.
+reasonMethodInVFTable(Entry, VFTable, Method) :-
+    not(purecall(Entry)),
+    factVFTableEntry(VFTable, _Offset, Entry),
+    dethunk(Entry, Method).
+
 guessMergeClassesB(Class1, Class2) :-
+    % XXX: We could rewrite this using factMethodInVFTable
     factVFTableEntry(VFTable, _VFTableOffset, Entry1),
     not(purecall(Entry1)), % Never merge purecall methods into classes.
     dethunk(Entry1, Method1),
@@ -830,11 +843,20 @@ guessMergeClassesB(Class1, Class2) :-
     % The method is not also is some other VFTable.  When adding thunk support, Cory decided to
     % allow the second entry to differ so long as it resolved to the same place.  It's unclear
     % if this is really correct.
+
+    % Old code:
+    %% not((
+    %%            factVFTableEntry(OtherVFTable, _OtherVFTableOffset, Entry1A),
+    %%            % dethunk_nontabled?
+    %%            dethunk_nontabled(Entry1A, Method1),
+    %%            iso_dif(VFTable, OtherVFTable)
+    %%        )),
+
+    % New code using factMethodInVFTable/2
     not((
-               factVFTableEntry(OtherVFTable, _OtherVFTableOffset, Entry1A),
-               dethunk(Entry1A, Method1),
+               factMethodInVFTable(Method1, OtherVFTable),
                iso_dif(VFTable, OtherVFTable)
-       )),
+           )),
 
     find(Method1, Class1),
 
