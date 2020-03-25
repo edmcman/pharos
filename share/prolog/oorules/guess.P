@@ -817,7 +817,8 @@ guessMergeClasses(Out) :-
 % low overhead.
 :- dynamic factMethodInVFTable/2 as incremental.
 
-:- table reasonMethodInVFTable/3 as incremental.
+% trigger
+%:- table reasonMethodInVFTable/3 as incremental.
 reasonMethodInVFTable(Entry, VFTable, Method) :-
     not(purecall(Entry)),
     factVFTableEntry(VFTable, _Offset, Entry),

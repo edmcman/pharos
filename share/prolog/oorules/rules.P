@@ -1503,7 +1503,9 @@ reasonClassHasNoBaseSet(Set) :-
 :- table reasonClassHasUnknownBase_B/1 as incremental.
 :- table reasonClassHasUnknownBase_C/8 as incremental.
 :- table reasonClassHasUnknownBase_D/1 as incremental.
-:- table reasonClassHasUnknownBase_E/3 as incremental.
+
+% trigger
+%:- table reasonClassHasUnknownBase_E/3 as incremental.
 
 reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
@@ -2156,7 +2158,9 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
 %:- table reasonNOTMergeClasses_B/2 as incremental.
 :- table reasonNOTMergeClasses_C/2 as incremental.
 %:- table reasonNOTMergeClasses_D/2 as incremental.
-:- table reasonNOTMergeClasses_E/6 as incremental.
+
+% trigger
+%:- table reasonNOTMergeClasses_E/6 as incremental.
 :- table reasonNOTMergeClasses_F/2 as incremental.
 :- table reasonNOTMergeClasses_G/2 as incremental.
 %:- table reasonNOTMergeClasses_H/2 as incremental.
@@ -2164,8 +2168,12 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
 :- table reasonNOTMergeClasses_J/2 as incremental.
 :- table reasonNOTMergeClasses_K/2 as incremental.
 :- table reasonNOTMergeClasses_L/2 as incremental.
-:- table reasonNOTMergeClasses_M/4 as incremental.
-:- table reasonNOTMergeClasses_N/4 as incremental.
+
+% trigger
+%:- table reasonNOTMergeClasses_M/4 as incremental.
+% trigger
+%:- table reasonNOTMergeClasses_N/4 as incremental.
+
 :- table reasonNOTMergeClasses_O/2 as incremental.
 :- table reasonNOTMergeClasses_P/2 as incremental.
 
