@@ -1198,26 +1198,28 @@ tryNOTDeletingDestructor(Method) :-
 
 % A helper for guessing deleting destructors.
 :- table likelyDeletingDestructor/2 as incremental.
+
+likelyDeletingDestructor(_, RealDestructor) :-
+    ground(RealDestructor),
+    backtrace(100),
+    throw(error('likelyDeletingDestructor/2 called in unexpected manner.')).
+
 likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
-    % This indicates that the method met some basic criteria in C++.
-    possibleDestructor(DeletingDestructor),
-    % That's not already certain to NOT be a deleting destructor.
-    not(factNOTDeletingDestructor(DeletingDestructor)),
     % Deleting destructors must call the real destructor (we think).  Usually offset is zero,
     % but there are some unusual cases where there are multiple calls to real destructors, and
     % only one has offset zero and we missed it because we're not handling imported OO methods
     % correctly.  A cheap hack to just be a little looser here and accept any calls to
-    % destructors.
-    validFuncOffset(_RealDestructorInsn, DeletingDestructor, RealDestructor, _Offset),
-    % And while it's premature to require the real destructor to be certain, it shouldn't be
-    % disproven.
-    possibleDestructor(RealDestructor),
-    not(factNOTRealDestructor(RealDestructor)),
+    % destructors. Note we do NOT bind _RealDestructor.  See note below.
+    validFuncOffset(_RealDestructorInsn1, DeletingDestructor, _RealDestructor, _Offset1),
+
+    % This indicates that the method met some basic criteria in C++.
+    possibleDestructor(DeletingDestructor),
+    % That's not already certain to NOT be a deleting destructor.
+    not(factNOTDeletingDestructor(DeletingDestructor)),
     % And the deleting destructor must also call delete (we think), since that's what makes it
     % deleting.  Using this instead of the more complicated rule below led toa very slight
     % improvement in the fast test suite F=0.43 -> F=0.44.
     insnCallsDelete(DeleteInsn, DeletingDestructor, _SV),
-
     % This condition is complicated.  We want to ensure that the thing actually being deleted
     % is the this-pointer passed to the deleting destructor.  But the detection of parameters
     % to delete is sometimes complicated, and a non-trivial number of our facts are still
@@ -1231,6 +1233,16 @@ likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
         insnCallsDelete(DeleteInsn, DeletingDestructor, ThisPtr);
         insnCallsDelete(DeleteInsn, DeletingDestructor, invalid)
     ),
+
+    % Phew. Everything up until this point has been about the _deleting destructor_.  We
+    % intentionally did _not_ bind RealDestructor.  Now that we've checked out the deleting
+    % destructor, let's look for any possible real destructor.
+    validFuncOffset(_RealDestructorInsn2, DeletingDestructor, RealDestructor, _Offset2),
+
+    % And while it's premature to require the real destructor to be certain, it shouldn't be
+    % disproven.
+    possibleDestructor(RealDestructor),
+    not(factNOTRealDestructor(RealDestructor)),
     true.
 
 /* Local Variables:   */
