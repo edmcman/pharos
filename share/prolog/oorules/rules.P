@@ -659,6 +659,21 @@ reasonVFTableOverwrite(VFTable2, VFTable1, Offset) :-
 :- table reasonPrimaryVFTableForClass/2 as incremental.
 
 % PAPER: PrimaryVFTable
+
+% Free, Bound
+reasonPrimaryVFTableForClass(VFTable, Class) :-
+    free(VFTable),
+    nonvar(Class),
+    !,
+    find(Method, Class),
+    % Primary VFTables are always at offset zero?
+    factVFTableWrite(_Insn, Method, 0, VFTable),
+    not(factVFTableOverwrite(_OtherVFTable, VFTable, 0)).
+
+% Bound, Bound: OK
+% Bound, Free: OK
+% Free, Bound: Not OK
+% Free, Free: OK
 reasonPrimaryVFTableForClass(VFTable, Class) :-
     % Primary VFTables are always at offset zero?
     factVFTableWrite(_Insn, Method, 0, VFTable),
