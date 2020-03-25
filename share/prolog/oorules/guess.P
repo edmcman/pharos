@@ -1040,15 +1040,15 @@ guessRealDestructor(Out) :-
 
     Out = tryOrNOTRealDestructor(Method).
 
-tryOrNOTRealDestructor(Method) :-
-    likelyDeletingDestructor(DeletingDestructor, Method),
-    % Require that we've already confirmed the deleting destructor.
-    factDeletingDestructor(DeletingDestructor),
-    doNotGuessHelper(factRealDestructor(Method),
-                     factNOTRealDestructor(Method)),
-    countGuess,
-    (tryRealDestructor(Method);
-     tryNOTRealDestructor(Method)).
+%% tryOrNOTRealDestructor(Method) :-
+%%     likelyDeletingDestructor(DeletingDestructor, Method),
+%%     % Require that we've already confirmed the deleting destructor.
+%%     factDeletingDestructor(DeletingDestructor),
+%%     doNotGuessHelper(factRealDestructor(Method),
+%%                      factNOTRealDestructor(Method)),
+%%     countGuess,
+%%     (tryRealDestructor(Method);
+%%      tryNOTRealDestructor(Method)).
 
 % Establish that the candidate meets minimal requirements.
 minimalRealDestructor(Method) :-
