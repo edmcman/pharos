@@ -493,36 +493,35 @@ tryAGuess :-
     countFacts(N),
     progress(N).
 
-restOfLoop :-
-    logtraceln('reasoningLoop: pre-reason sanityChecks'),
-    (sanityChecks
-    -> loginfoln('Constraint checks succeeded, proceeding to reason forward!')
-    ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-    logtraceln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
-    reasonForwardAsManyTimesAsPossible,
-    logdebugln('reasoningLoop: post-reason sanityChecks'),
-    (sanityChecks
-    -> loginfoln('Constraint checks succeeded, guess accepted!')
-    ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-    (backtrackForUpstream ->
-         (reasoningLoop;
-          % If we have reached this point, sanity checks have initially passed but we have
-          % backtracked here, which means an upstream problem caused us to backtrack.  This is
-          % controlled by the backtrackForUpstream/0 option.
-          (loginfoln('Backtracking into reasoningLoop/0 to fix an upstream problem.'),
-           fail));
-          % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
-          (!,
-           (reasoningLoop;
-            (logerrorln('Refusing to backtrack into reasoningLoop to fix an upstream problem.  The results returned by this run will be inaccurate.'),
-             % Don't recurse to force exit.
-             true)))).
 
 % When reasoning, if we ever run out of guesses, we are done!  Otherwise, we execute the rest
 % of the loop, but we must preserve choice points so that we can backtrack to the latest guess
 % even if that is in another loop iteration.
 reasoningLoop :-
-    if_(tryAGuess, restOfLoop, true).
+    if_(tryAGuess,
+        (logtraceln('reasoningLoop: pre-reason sanityChecks'),
+         (sanityChecks
+         -> loginfoln('Constraint checks succeeded, proceeding to reason forward!')
+         ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
+         logtraceln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
+         reasonForwardAsManyTimesAsPossible,
+         logdebugln('reasoningLoop: post-reason sanityChecks'),
+         (sanityChecks
+         -> loginfoln('Constraint checks succeeded, guess accepted!')
+         ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
+         (backtrackForUpstream ->
+              (reasoningLoop;
+               % If we have reached this point, sanity checks have initially passed but we have
+               % backtracked here, which means an upstream problem caused us to backtrack.  This is
+               % controlled by the backtrackForUpstream/0 option.
+               (loginfoln('Backtracking into reasoningLoop/0 to fix an upstream problem.'),
+                fail));
+          % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
+          (!,
+           reasoningLoop;
+           logerrorln('Refusing to backtrack into reasoningLoop to fix an upstream problem because backtrackForUpstream/0 is not set.  The results will be inaccurate.')))),
+         % If we can't guess, exit with true.
+         true).
 
 % --------------------------------------------------------------------------------------------
 % The performance of our code is highly dependent on the ordering of these guesses.  Making bad
@@ -596,7 +595,9 @@ guess :-
 
         (
             call(Out);
-            (logdebug('guess: We have back-tracked to the call of '), logdebugln(Out), fail)
+            (logdebug('guess: We have back-tracked to the call of '),
+             logdebugln(Out),
+             fail)
         ).
 
 % Actually check to see if the solution is complete.
