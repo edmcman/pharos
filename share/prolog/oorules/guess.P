@@ -800,12 +800,13 @@ guessMergeClassesA(Class1, MethodClass) :-
     checkMergeClasses(Class1, MethodClass).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesA(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesA(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_A('),
-    logdebug(TupleSet), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, TupleSet, 1).
+    logdebug(OneTuple), logdebugln(').'),
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 % Another good guessing heuristic is that if a virtual call was resolved through a specific
 % VFTable, and there's nothing contradictory, try assigning the call to the class that it was
@@ -875,12 +876,13 @@ guessMergeClassesB(Class1, Class2) :-
     checkMergeClasses(Class1, Class2).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesB(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesB(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_B('),
-    logdebug(TupleSet), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, TupleSet, 1).
+    logdebug(OneTuple), logdebugln(').'),
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 
 % This rule makes guesses about whether to assign methods to the derived class or the base
@@ -902,12 +904,13 @@ guessMergeClassesC(Class1, Class2) :-
     checkMergeClasses(Class1, Class2).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesC(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesC(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_C('),
-    logdebug(TupleSet), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, TupleSet, 1).
+    logdebug(OneTuple), logdebugln(').'),
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 % If that didn't work, maybe the method belongs on the base instead.
 % ED_PAPER_INTERESTING
@@ -921,12 +924,13 @@ guessMergeClassesD(Class1, Class2) :-
     checkMergeClasses(Class1, Class2).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesD(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesD(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_D('),
-    logdebug(TupleSet), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, TupleSet, 1).
+    logdebug(OneTuple), logdebugln(').'),
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 % And finally just guess regardless of derived class facts.
 % ED_PAPER_INTERESTING
@@ -941,13 +945,13 @@ guessMergeClassesE(Class1, Class2) :-
     checkMergeClasses(Class1, Class2).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesE(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesE(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_E('),
-    take(1, TupleSet, OneTuple),
     logdebug(OneTuple), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple).
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 % If we have VFTable that is NOT associated with a class because there's no factVFTableWrite,
 % factClassCallsMethod is not true...  The problem here is that we don't which method call
@@ -979,12 +983,13 @@ guessMergeClassesF(Class, Method1) :-
     checkMergeClasses(Class, Method1).
 
 guessMergeClasses(Out) :-
-    osetof((Class, Method),
-          guessMergeClassesF(Class, Method),
-          TupleSet),
+    minof((Class, Method),
+          guessMergeClassesF(Class, Method)),
+    !,
+    OneTuple=[(Class, Method)],
     logdebug('Proposing factMergeClasses_F('),
-    logdebug(TupleSet), logdebugln(').'),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, TupleSet, 1).
+    logdebug(OneTuple), logdebugln(').'),
+    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
 checkMergeClasses(Method1, Method2) :-
     iso_dif(Method1, Method2),
