@@ -105,7 +105,7 @@ worthlessClass(ClassID) :-
     % We've already excluded constructor.
     not((
                find(RealDestructor, Class),
-               factRealDestructor(RealDestructor),
+               factRealDestructor(RealDestructor)
        )),
 
     % A worthless class has only one method
