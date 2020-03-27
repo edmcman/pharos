@@ -53,7 +53,7 @@
 :- index(symbolProperty/2, [2]).
 :- dynamic symbolProperty/2.
 :- index(thunk/2, [1,2]).
-:- dynamic thunk/2.
+:- dynamic thunk/2 as abstract(0).
 :- index(intialMemory/2, [1]).
 :- dynamic initialMemory/2.
 
