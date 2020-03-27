@@ -105,10 +105,8 @@ iso_dif(X, Y) :-
    X \== Y,
    ( X \= Y -> true
    ;
-   machine:xsb_backtrace(B),
-   error_handler:print_backtrace(B),
    write('X='), write(X), write(' Y='), writeln(Y),
-   throw(error(instantiation_error,iso_dif/2))
+   throw_with_backtrace(error(instantiation_error,iso_dif/2))
    ).
 
 % list_min([5,2,8,1,4], Min). unifies Min with 1.
@@ -283,6 +281,18 @@ show_progress :-
     logdebugln('total number of reasoningForward steps is'(RFN,T)),
     statistics,
     show_progress_idg.
+
+:- if(current_prolog_flag(version_data, xsb(_,_,_,_))).
+throw_with_backtrace(Throw) :-
+   machine:xsb_backtrace(B),
+   error_handler:print_backtrace(B),
+   throw(Throw).
+:- else
+throw_with_backtrace(Throw) :-
+    backtrace(100),
+    throw(Throw).
+:- endif.
+
 
 shut_down :-
     show_progress, halt.

@@ -222,8 +222,7 @@ dethunk(Thunk, Result) :-
 dethunk_nontabled(Thunk, Result) :-
     var(Thunk),
     ground(Result),
-    backtrace(100),
-    throw(error('dethunk/2 called in a bizarre manner.')).
+    throw_with_backtrace(error(uninstantiation_error(Result), dethunk/2)).
 
 dethunk_nontabled(Thunk, Result) :-
     eventualThunk(Thunk, Target) -> Result = Target; Result = Thunk.

@@ -71,10 +71,7 @@ class_size_remove_redundant(factClassSizeLTE(Class, Size)) :-
     true).
 
 class_size_remove_redundant(X) :-
-    logerrorln(X),
-    throw('class_size_remove_redundant/1 called on unexpected argument'),
-    fail.
-
+    throw_with_backtrace(error(representation_error(X), class_size_remove_redundant/1)).
 ignore_one_arg(_X).
 
 % Helper that produces an action from the arguments

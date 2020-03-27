@@ -1209,8 +1209,7 @@ tryNOTDeletingDestructor(Method) :-
 
 likelyDeletingDestructor(_, RealDestructor) :-
     ground(RealDestructor),
-    backtrace(100),
-    throw(error('likelyDeletingDestructor/2 called in unexpected manner.')).
+    throw_with_backtrace(error(uninstantiation_error(RealDestructor), likelyDeletingDestructor/2)).
 
 likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
     % Deleting destructors must call the real destructor (we think).  Usually offset is zero,
