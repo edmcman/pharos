@@ -74,6 +74,41 @@ classIdentifier(Method, ID) :-
 % A helper for identifying "worthless" classes to reduce noise in the output.
 %:- table worthlessClass/1 as opaque.
 
+% A class is useful if it appears in a relationship.
+usefulClass(Class) :-
+    factEmbeddedObject(_, Class, _);
+    factEmbeddedObject(Class, _, _);
+    factDerivedClass(_, Class, _);
+    factDerivedClass(Class, _, _).
+
+% A class is useful if it has a VFTable.
+usefulClass(Class) :-
+    find(XMethod, Class),
+    factVFTableWrite(_Insn, XMethod, 0, VFTable),
+    not(factVFTableOverwrite(VFTable, _PrimaryVFTable, 0)).
+
+% A class is useful if it is not size zero.
+usefulClass(Class) :-
+    reasonMinimumPossibleClassSize(Class, Size), Size > 0.
+
+% A Class containing a real destructor is useful.
+usefulClass(Class) :-
+    find(Method, Class),
+    factRealDestructor(Method).
+
+% A class with more than one method is useful.
+usefulClass(Class) :-
+    findallMethods(Class, List),
+    length(List, Len),
+    Len > 1.
+
+% A class that has a non-purecall method (that is not called by a purecall thunk) is useful.
+usefulClass(Class) :-
+    find(Method, Class),
+    factMethod(Method),
+    not(purecall(Method)),
+    not((eventualThunk(Thunk, Method), purecall(Thunk))).
+
 % We want to reject classes with no useful information.  In practice this means having a single
 % method, and no other "useful" data like a real destructor, a vftable, etc.  Sadly the final
 % class rule is pretty complicated, this rule is largely a copy of that rule.  Maybe in the
@@ -84,38 +119,7 @@ worthlessClass(ClassID) :-
 
 worthlessClass(ClassID) :-
     classIdentifier(Class, ClassID),
-
-    % Keep classes appearing in inhertiance relationships.
-    not(factEmbeddedObject(_EClass1, Class, _EOffset1)),
-    not(factEmbeddedObject(Class, _EClass2, _EOffset2)),
-    not(factDerivedClass(_IClass1, Class, _IOffset1)),
-    not(factDerivedClass(Class, _IClass2, _OOffset2)),
-
-    % A VFTable definitely is "useful".
-    not((
-               find(XMethod, Class),
-               factVFTableWrite(_Insn, XMethod, 0, VFTable),
-               not(factVFTableOverwrite(VFTable, _PrimaryVFTable, 0))
-       )),
-
-    % A non-zero class size is "useful".
-    reasonMinimumPossibleClassSize(Class, 0),
-
-    % A real destructor counts as "useful"?  Perhaps this should excluded becuse it's guessed.
-    % We've already excluded constructor.
-    not((
-               find(RealDestructor, Class),
-               factRealDestructor(RealDestructor)
-       )),
-
-    % A worthless class has only one method
-    findallMethods(Class, UnsortedMethodList),
-    length(UnsortedMethodList, 1),
-
-    % Classes are worthless if their only method is purecall or a thunk to purecall.
-    find(Method, Class),
-    factMethod(Method),
-    (purecall(Method); eventualThunk(P, Method), purecall(P)),
+    not(usefulClass(Class)),
 
     logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
 
