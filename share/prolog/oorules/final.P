@@ -91,7 +91,12 @@ usefulClass(Class) :-
 usefulClass(Class) :-
     reasonMinimumPossibleClassSize(Class, Size), Size > 0.
 
-% A Class containing a real destructor is useful.
+% A class containing a constructor is useful.
+usefulClass(Class) :-
+    find(Method, Class),
+    factConstructor(Method).
+
+% A class containing a real destructor is useful.
 usefulClass(Class) :-
     find(Method, Class),
     factRealDestructor(Method).
