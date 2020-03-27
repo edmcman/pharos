@@ -85,7 +85,7 @@ classIdentifier(Method, ID) :-
 
 % --------------------------------------------------------------------------------------------
 % A helper for identifying "worthless" classes to reduce noise in the output.
-:- table worthlessClass/1 as incremental.
+:- table worthlessClass/1 as opaque.
 
 % We want to reject classes with no useful information.  In practice this means having a single
 % method, and no other "useful" data like a real destructor, a vftable, etc.  Sadly the final
