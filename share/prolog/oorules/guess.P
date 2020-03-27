@@ -1159,16 +1159,14 @@ guessFinalDeletingDestructor(Out) :-
 
     insnCallsDelete(_Insn2, Method, _SV),
 
-    % Instead of requiring a call to a real destructor, allow deleting destructors that don't
-    % call real destructors (just so long as they don't call anything else).  Net effect is a
-    % tiny improvement on the fast portion of the test suite.
+    % guessDeletingDestructor requires a call to a real destructor.  This rule relaxes that a
+    % bit, by ensuring we don't call any non-real destructors.  So calling a real destructor
+    % will trigger this rule, but it is not necessary.
     not((
                callTarget(_Insn1, Method, Called),
                not(factRealDestructor(Called))
        )),
 
-    %callTarget(_Insn1, Method, RealDestructor),
-    %factRealDestructor(RealDestructor),
     !,
     Out = tryOrNOTDeletingDestructor(Method).
 
@@ -1184,12 +1182,20 @@ guessFinalDeletingDestructor(Out) :-
 
     % If the method occurs twice in a single VFTable, wildly guess that it's a deleting
     % destructor based entirely on a common phenomenon in the Visual Studio compiler.
+
+    % There is a thunk to Method in VFTable
+    factMethodInVFTable(Method, VFTable),
+
+    % For this rule to apply, there has to be two different entries that thunk to Method
     factVFTableEntry(VFTable, Offset1, Entry1),
     dethunk(Entry1, Method),
     factVFTableEntry(VFTable, Offset2, Entry2),
-    iso_dif(Entry1, Entry2),
+    dethunk(Entry2, Method),
     iso_dif(Offset1, Offset2),
-    dethunk(Entry1, Method),
+
+    % We are not sure if the entry actually has to differ or not.  We should experiment with
+    % whether removing the next line improves accuracy.
+    iso_dif(Entry1, Entry2),
 
     !,
     Out = tryOrNOTDeletingDestructor(Method).
