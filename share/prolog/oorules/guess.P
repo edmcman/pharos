@@ -827,7 +827,6 @@ reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
     dethunk(Entry, Method).
 
 guessMergeClassesB(Class1, Class2) :-
-    % XXX: We could rewrite this using factMethodInVFTable
     factVFTableEntry(VFTable, _VFTableOffset, Entry1),
     not(purecall(Entry1)), % Never merge purecall methods into classes.
     dethunk(Entry1, Method1),
