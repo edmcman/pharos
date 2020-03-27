@@ -65,6 +65,18 @@ minof(A, B) :-
 
 %% end list_to_set
 
+% ejs: This is basically List.filter
+include(Goal, List, Included) :-
+    include_(List, Goal, Included).
+
+include_([], _, []).
+include_([X1|Xs1], P, Included) :-
+    (   call(P, X1)
+        ->  Included = [X1|Included1]
+        ;   Included = Included1
+    ),
+    include_(Xs1, P, Included1).
+
 tuple_to_list((A,B), L) :-
     !,
     tuple_to_list(A, L0),

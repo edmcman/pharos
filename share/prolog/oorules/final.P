@@ -17,19 +17,6 @@
 
 % ejs: It sure would be nice if there was a consistent prolog library...
 
-include(Goal, List, Included) :-
-    include_(List, Goal, Included).
-
-include_([], _, []).
-include_([X1|Xs1], P, Included) :-
-    (   call(P, X1)
-        ->  Included = [X1|Included1]
-        ;   Included = Included1
-    ),
-    include_(Xs1, P, Included1).
-
-findallMethods(C, O) :- findall(C, L), include(factMethod, L, O).
-
 % ============================================================================================
 % Class Identification...
 % ============================================================================================
@@ -127,6 +114,7 @@ worthlessClass(ClassID) :-
 
     % Classes are worthless if their only method is purecall or a thunk to purecall.
     find(Method, Class),
+    factMethod(Method),
     (purecall(Method); eventualThunk(P, Method), purecall(P)),
 
     logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
