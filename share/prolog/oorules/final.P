@@ -72,7 +72,7 @@ classIdentifier(Method, ID) :-
 
 % --------------------------------------------------------------------------------------------
 % A helper for identifying "worthless" classes to reduce noise in the output.
-:- table worthlessClass/1 as opaque.
+%:- table worthlessClass/1 as opaque.
 
 % We want to reject classes with no useful information.  In practice this means having a single
 % method, and no other "useful" data like a real destructor, a vftable, etc.  Sadly the final
@@ -121,7 +121,7 @@ worthlessClass(ClassID) :-
 
 % --------------------------------------------------------------------------------------------
 % This final result defines the existance of a class.   More details in results.txt.
-:- table finalClass/6 as incremental.
+%:- finalClass/6 as incremental.
 finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodList) :-
     find(Method, Class),
     reasonMethod(Method),
@@ -147,7 +147,7 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
 
 % --------------------------------------------------------------------------------------------
 % This final result defines the properties of a VFTable.   More details in results.txt.
-:- table finalVFTable/5 as incremental.
+%:- finalVFTable/5 as incremental.
 finalVFTable(VFTable, CertainSize, LikelySize, RTTIAddressOrNull, RTTINameOrNull) :-
     factVFTable(VFTable),
     (reasonRTTIInformation(VFTable, RTTIAddress, RTTIName) ->
@@ -163,19 +163,19 @@ finalVFTableEntry(VFTable, Offset, Method) :-
     factVFTableEntry(VFTable, Offset, Method).
 
 % --------------------------------------------------------------------------------------------
-:- table finalVBTable/4 as incremental.
+%:- finalVBTable/4 as incremental.
 finalVBTable(VBTable, Class, Size, Offset) :-
     factVBTable(VBTable),
     factVBTableWrite(_Insn, Method, Offset, VBTable),
     findall(CertainOffset, factVBTableEntry(VBTable, CertainOffset, _Value), CertainOffsets),
     list_max(CertainOffsets, Size),
-    find(Method, Class).
+    classIdentifier(Method, Class).
 
 finalVBTableEntry(VBTable, Offset, Value) :-
     factVBTableEntry(VBTable, Offset, Value).
 
 % --------------------------------------------------------------------------------------------
-:- table finalEmbeddedObject/4 as incremental.
+%:- finalEmbeddedObject/4 as incremental.
 
 % In the Outer class identifier at the specified offset is an object instance of the type
 % specified by EmbeddedClass indeitifier.  The embedded object is not believed to be a base
@@ -187,7 +187,7 @@ finalEmbeddedObject(OuterClass, Offset, EmbeddedClass, likely) :-
     iso_dif(OuterClass, EmbeddedClass).
 
 % --------------------------------------------------------------------------------------------
-:- table finalInheritance/5 as incremental.
+%:- finalInheritance/5 as incremental.
 
 % In the Derived class at the specified offset is an object instance of the type specified by
 % Base.  If the base class is not the first base class (non-zero offset) and the base class has
@@ -227,7 +227,7 @@ finalInheritance(DerivedClassID, BaseClassID, ObjectOffset, VFTableOrNull, false
 %    not_exists(factVFTableWrite(_Insn, DerivedConstructor, ObjectOffset, _VFTable)).
 
 % --------------------------------------------------------------------------------------------
-:- table certainMemberAccessEvidence/4 as incremental.
+%%:- certainMemberAccessEvidence/4 as incremental.
 
 % Find all methods that access offsets in the class.
 certainMemberAccessEvidence(Class, Offset, Size, Insn) :-
@@ -237,7 +237,7 @@ certainMemberAccessEvidence(Class, Offset, Size, Insn) :-
     validMethodMemberAccess(Insn, Method, Offset, Size).
 
 % --------------------------------------------------------------------------------------------
-:- table finalMemberAccess/4 as incremental.
+%:- finalMemberAccess/4 as incremental.
 
 % The member at Offset in Class was accessed using the given Size by the list of evidence
 % instructions provided. The list of evidence instructions only contains instructions from the
@@ -255,7 +255,7 @@ finalMemberAccess(ClassID, Offset, Size, EvidenceList) :-
     sort(UnsortedEvidenceList, EvidenceList).
 
 % --------------------------------------------------------------------------------------------
-:- table finalMember/4 as incremental.
+%:- finalMember/4 as incremental.
 
 % The finalMember() result documents the existence of the definition of a member on a specific
 % class.  The intention (possibly with a currently incorrect implementation) is that we will
@@ -281,7 +281,7 @@ finalMember(ClassID, Offset, Sizes, certain) :-
 % ============================================================================================
 
 % --------------------------------------------------------------------------------------------
-:- table finalMethodProperty/3 as incremental.
+%:- finalMethodProperty/3 as incremental.
 % In many cases, no qualifiers of any kind are required for specific methods.  However, there
 % are multiple properties of a method that can all be determined at different confidence levels
 % independently.
@@ -334,7 +334,7 @@ finalMethodProperty(Method, virtual, certain) :-
 % must be as large (or larger than it's base class?)
 
 % --------------------------------------------------------------------------------------------
-:- table finalResolvedVirtualCall/3 as incremental.
+%:- finalResolvedVirtualCall/3 as incremental.
 
 % The call at Insn can be resolved to the Target through the virtual function table at VFTable.
 % Most of the information describing a virtual function call is already avilable in C++ once
