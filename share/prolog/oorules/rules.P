@@ -2531,8 +2531,8 @@ reasonSharedImplementation(Method, Class1) :-
 :- table certainMemberOnClass/3 as incremental.
 
 certainMemberOnClass(Class, Offset, Size) :-
-    factMethod(Method),
     find(Method, Class),
+    factMethod(Method),
     validMethodMemberAccess(_Insn, Method, Offset, Size).
 
 certainMemberOnClassSet(Class, Set) :-
