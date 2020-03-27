@@ -1137,7 +1137,7 @@ guessDeletingDestructor(Out) :-
           (likelyDeletingDestructor(Method, _RealDestructor),
            doNotGuessHelper(factDeletingDestructor(Method),
                             factNOTDeletingDestructor(Method)))),
-
+    !,
     Out = tryOrNOTDeletingDestructor(Method).
 
 tryOrNOTDeletingDestructor(Method) :-
@@ -1169,6 +1169,7 @@ guessFinalDeletingDestructor(Out) :-
 
     %callTarget(_Insn1, Method, RealDestructor),
     %factRealDestructor(RealDestructor),
+    !,
     Out = tryOrNOTDeletingDestructor(Method).
 
 %
@@ -1190,6 +1191,7 @@ guessFinalDeletingDestructor(Out) :-
     iso_dif(Offset1, Offset2),
     dethunk(Entry1, Method),
 
+    !,
     Out = tryOrNOTDeletingDestructor(Method).
 
 tryDeletingDestructor(Method) :-
