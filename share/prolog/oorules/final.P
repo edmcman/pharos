@@ -26,6 +26,11 @@
 % rule and tabling to give us just one answer...   I think.
 
 classIdentifier(Method, ID) :-
+    var(Method),
+    nonvar(ID),
+    throw_with_backtrace(error(instantiation_error, classIdentifier/2)).
+
+classIdentifier(Method, ID) :-
     (
         % Must be the VFTable at offset zero to be the "master" table for the class.
         find(Method, Class),
@@ -106,26 +111,25 @@ usefulClass(Class) :-
 % method, and no other "useful" data like a real destructor, a vftable, etc.  Sadly the final
 % class rule is pretty complicated, this rule is largely a copy of that rule.  Maybe in the
 % future we can find some witty way to structure this that results in better code reuse.
-worthlessClass(ClassID) :-
-    var(ClassID),
+worthlessClass(Class) :-
+    var(Class),
     throw_with_backtrace(error(instantiation_error, worthlessClass/1)).
 
 % A class is worthless if (1) it's not useful, or (2) contains purecall.
-worthlessClass(ClassID) :-
-    classIdentifier(Class, ClassID),
+worthlessClass(Class) :-
     not(usefulClass(Class)),
     !,
 
-    logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
-
-worthlessClass(ClassID) :-
     classIdentifier(Class, ClassID),
+    logdebug('Rejecting worthless finalClass '), logdebugln(ClassID).
 
+worthlessClass(Class) :-
     purecall(PurecallMethod),
     find(PurecallMethod, Class),
     !,
 
-    logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
+    classIdentifier(Class, ClassID),
+    logdebug('Rejecting worthless finalClass '), logdebugln(ClassID).
 
 % --------------------------------------------------------------------------------------------
 % This final result defines the existance of a class.   More details in results.txt.
@@ -136,7 +140,7 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
     not(purecall(Method)),
     not((eventualThunk(P, Method), purecall(P))),
     classIdentifier(Class, ClassID),
-    not(worthlessClass(ClassID)),
+    not(worthlessClass(Class)),
     % If there's a certain VFTableWrite, use the VFTable value from it -- if not use zero.
     % Always pick the VFTable at offset zero, because that's the "master" one.
     ((find(XMethod, Class),
