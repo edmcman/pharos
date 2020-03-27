@@ -299,7 +299,7 @@ throw_with_backtrace(Throw) :-
    machine:xsb_backtrace(B),
    error_handler:print_backtrace(B),
    throw(Throw).
-:- else
+:- else.
 throw_with_backtrace(Throw) :-
     backtrace(100),
     throw(Throw).

@@ -104,7 +104,7 @@ worthlessClass(ClassID) :-
     % A real destructor counts as "useful"?  Perhaps this should excluded becuse it's guessed.
     % We've already excluded constructor.
     not((
-               find(RealDestructor, Class)
+               find(RealDestructor, Class),
                factRealDestructor(RealDestructor),
        )),
 
