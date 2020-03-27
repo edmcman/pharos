@@ -816,13 +816,14 @@ guessMergeClasses(Out) :-
 % This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
 % putting it in a separate fact, we can make it a trigger-based fact that is maintained with
 % low overhead.
-:- dynamic factMethodInVFTable/2 as incremental.
+% factMethodInVFTable/3
 
 % trigger
-%:- table reasonMethodInVFTable/3 as incremental.
-reasonMethodInVFTable(Entry, VFTable, Method) :-
+% XXX: Should this be in rules.P?
+%:- table reasonMethodInVFTable/4 as incremental.
+reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
     not(purecall(Entry)),
-    factVFTableEntry(VFTable, _Offset, Entry),
+    factVFTableEntry(VFTable, Offset, Entry),
     dethunk(Entry, Method).
 
 guessMergeClassesB(Class1, Class2) :-
@@ -856,7 +857,7 @@ guessMergeClassesB(Class1, Class2) :-
 
     % New code using factMethodInVFTable/2
     not((
-               factMethodInVFTable(Method1, OtherVFTable),
+               factMethodInVFTable(OtherVFTable, _Offset, Method1),
                iso_dif(VFTable, OtherVFTable)
            )),
 
@@ -1183,15 +1184,14 @@ guessFinalDeletingDestructor(Out) :-
     % If the method occurs twice in a single VFTable, wildly guess that it's a deleting
     % destructor based entirely on a common phenomenon in the Visual Studio compiler.
 
-    % There is a thunk to Method in VFTable
-    factMethodInVFTable(Method, VFTable),
+    % There are two thunks to Method in VFTable
+    factMethodInVFTable(VFTable, Offset1, Method),
+    factMethodInVFTable(VFTable, Offset2, Method),
+    iso_dif(Offset1, Offset2),
 
     % For this rule to apply, there has to be two different entries that thunk to Method
     factVFTableEntry(VFTable, Offset1, Entry1),
-    dethunk(Entry1, Method),
     factVFTableEntry(VFTable, Offset2, Entry2),
-    dethunk(Entry2, Method),
-    iso_dif(Offset1, Offset2),
 
     % We are not sure if the entry actually has to differ or not.  We should experiment with
     % whether removing the next line improves accuracy.

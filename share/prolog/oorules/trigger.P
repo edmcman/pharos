@@ -38,13 +38,13 @@ trigger_hook(findint(A,B)) :-
 trigger_hook(_X).
 
 % MethodInVFTable, which is a helper for guessMergeClassesB
-dispatchTrigger(factVFTableEntry(VFTable, _Offset, Entry), Out) :-
-    setof((Method, VFTable),
-          (reasonMethodInVFTable(Entry, VFTable, Method),
-           not(factMethodInVFTable(Method, VFTable)),
-           loginfo('Concluding factMethodInVFTable('), loginfo(Method), loginfo(', '), loginfo(VFTable), loginfoln(').')),
-          PairSets),
-    maplist(try_assert_builder(factMethodInVFTable), PairSets, ActionSets),
+dispatchTrigger(factVFTableEntry(VFTable, Offset, Entry), Out) :-
+    setof((Method, Offset, VFTable),
+          (reasonMethodInVFTable(VFTable, Offset, Method, Entry),
+           not(factMethodInVFTable(VFTable, Offset, Method)),
+           loginfo('Concluding factMethodInVFTable('), loginfo(VFTable), loginfo(', '), loginfo(Method), loginfoln(').')),
+          TupleSets),
+    maplist(try_assert_builder(factMethodInVFTable), TupleSets, ActionSets),
     Out = all(ActionSets).
 
 % HasUnknownBase_C
