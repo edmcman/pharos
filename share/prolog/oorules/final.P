@@ -92,37 +92,43 @@ classIdentifier(Method, ID) :-
 % class rule is pretty complicated, this rule is largely a copy of that rule.  Maybe in the
 % future we can find some witty way to structure this that results in better code reuse.
 worthlessClass(ClassID) :-
-    find(Method, Class),
+    var(ClassID),
+    throw_with_backtrace(error(instantiation_error, worthlessClass/1)).
+
+worthlessClass(ClassID) :-
+    classIdentifier(Class, ClassID),
+
     % Keep classes appearing in inhertiance relationships.
     not(factEmbeddedObject(_EClass1, Class, _EOffset1)),
     not(factEmbeddedObject(Class, _EClass2, _EOffset2)),
     not(factDerivedClass(_IClass1, Class, _IOffset1)),
     not(factDerivedClass(Class, _IClass2, _OOffset2)),
 
-    reasonMethod(Method),
-    not(purecall(Method)),
-    not((eventualThunk(P, Method), purecall(P))),
-    classIdentifier(Class, ClassID),
-
-    % A VFTable definitely counts as "useful".
+    % A VFTable definitely is "useful".
     not((
                find(XMethod, Class),
                factVFTableWrite(_Insn, XMethod, 0, VFTable),
                not(factVFTableOverwrite(VFTable, _PrimaryVFTable, 0))
        )),
 
-    % Get the certain and likely class sizes.
+    % A non-zero class size is "useful".
     reasonMinimumPossibleClassSize(Class, 0),
 
     % A real destructor counts as "useful"?  Perhaps this should excluded becuse it's guessed.
     % We've already excluded constructor.
     not((
-               factRealDestructor(RealDestructor),
                find(RealDestructor, Class)
+               factRealDestructor(RealDestructor),
        )),
 
+    % A worthless class has only one method
     findallMethods(Class, UnsortedMethodList),
     length(UnsortedMethodList, 1),
+
+    % Classes are worthless if their only method is purecall or a thunk to purecall.
+    find(Method, Class),
+    (purecall(Method); eventualThunk(P, Method), purecall(P)),
+
     logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
 
 % --------------------------------------------------------------------------------------------
@@ -297,7 +303,8 @@ finalMember(ClassID, Offset, Sizes, certain) :-
 % currently scheduled for elimination.
 finalMethodProperty(Method, constructor, certain) :-
     factConstructor(Method),
-    not(worthlessClass(Method)).
+    classIdentifier(Method, ClassID),
+    not(worthlessClass(ClassID)).
 
 % --------------------------------------------------------------------------------------------
 % This result marks that a method is certain to be a deleting destructor.  The certain field is
@@ -305,7 +312,8 @@ finalMethodProperty(Method, constructor, certain) :-
 % given class is determined from the finalClass result.
 finalMethodProperty(Method, deletingDestructor, certain) :-
     factDeletingDestructor(Method),
-    not(worthlessClass(Method)).
+    classIdentifier(Method, ClassID),
+    not(worthlessClass(ClassID)).
 
 % --------------------------------------------------------------------------------------------
 % At one point I had though that this was duplicative, and therefore should not be included in
@@ -313,7 +321,8 @@ finalMethodProperty(Method, deletingDestructor, certain) :-
 % try it with it on for a while.
 finalMethodProperty(Method, realDestructor, certain) :-
     factRealDestructor(Method),
-    not(worthlessClass(Method)).
+    classIdentifier(Method, ClassID),
+    not(worthlessClass(ClassID)).
 
 % --------------------------------------------------------------------------------------------
 % This result marks whether a method is believed to be virtual, and what our confidence in that
@@ -329,7 +338,8 @@ finalMethodProperty(Method, virtual, certain) :-
     % But don't report purecall as virtual, because official symbols do not.
     not(purecall(Entry)),
     not(purecall(Method)),
-    not(worthlessClass(Method)).
+    classIdentifier(Method, ClassID),
+    not(worthlessClass(ClassID)).
 
 % Unimplemented rule: There might be a reasoning rule about transferring knowledge from one
 % virtual function to another.  Specifically that the virtual function table of a Derived class
