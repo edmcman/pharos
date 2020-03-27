@@ -102,13 +102,6 @@ usefulClass(Class) :-
     length(List, Len),
     Len > 1.
 
-% A class that has a non-purecall method (that is not called by a purecall thunk) is useful.
-usefulClass(Class) :-
-    find(Method, Class),
-    factMethod(Method),
-    not(purecall(Method)),
-    not((eventualThunk(Thunk, Method), purecall(Thunk))).
-
 % We want to reject classes with no useful information.  In practice this means having a single
 % method, and no other "useful" data like a real destructor, a vftable, etc.  Sadly the final
 % class rule is pretty complicated, this rule is largely a copy of that rule.  Maybe in the
@@ -117,9 +110,20 @@ worthlessClass(ClassID) :-
     var(ClassID),
     throw_with_backtrace(error(instantiation_error, worthlessClass/1)).
 
+% A class is worthless if (1) it's not useful, or (2) contains purecall.
 worthlessClass(ClassID) :-
     classIdentifier(Class, ClassID),
     not(usefulClass(Class)),
+    !,
+
+    logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
+
+worthlessClass(ClassID) :-
+    classIdentifier(Class, ClassID),
+
+    purecall(PurecallMethod),
+    find(PurecallMethod, Class),
+    !,
 
     logtrace('Rejecting worthless finalClass '), logtraceln(ClassID).
 
