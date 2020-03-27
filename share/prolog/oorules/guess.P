@@ -962,16 +962,16 @@ guessMergeClasses(Out) :-
 guessMergeClassesF(Class, Method1) :-
     % There are two different entries in the same VFTable...
     factVFTableEntry(VFTable, _Offset1, Entry1),
+    not(purecall(Entry1)), % Never merge purecall methods into classes.
+    dethunk(Entry1, Method1),
+    not(purecall(Method1)), % Never merge purecall methods into classes.
     factVFTableEntry(VFTable, _Offset2, Entry2),
     iso_dif(Entry1, Entry2),
+    not(purecall(Entry2)), % Never merge purecall methods into classes.
     % Follow thunks for both entries.  What does it mean if the thunks differed but the methods
     % did not?  Cory's not sure right now, but this is what the original rule did.
-    dethunk(Entry1, Method1),
     dethunk(Entry2, Method2),
     iso_dif(Method1, Method2),
-    not(purecall(Entry1)), % Never merge purecall methods into classes.
-    not(purecall(Entry2)), % Never merge purecall methods into classes.
-    not(purecall(Method1)), % Never merge purecall methods into classes.
     not(purecall(Method2)), % Never merge purecall methods into classes.
     % One of the methods is in a class all by itself right now.
     % ejs: The prolog does not match the comment.
