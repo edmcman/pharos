@@ -1185,7 +1185,9 @@ guessFinalDeletingDestructor(Out) :-
 
     % There are two thunks to Method in VFTable
     factMethodInVFTable(VFTable, Offset1, Method),
-    factMethodInVFTable(VFTable, Offset2, Method),
+    % XXX: By binding to _Other_Method instead of Method on the next line, we are preserving a
+    % known bug because it seems to produce better results for destructors.
+    factMethodInVFTable(VFTable, Offset2, _Other_Method),
     iso_dif(Offset1, Offset2),
 
     % For this rule to apply, there has to be two different entries that thunk to Method
