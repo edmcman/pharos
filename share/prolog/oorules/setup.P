@@ -9,69 +9,41 @@
 
 :- dynamic guessingDisabled/0 as opaque.
 :- dynamic method/1 as incremental.
-:- index(funcOffset/4, [2,3,4]).
 :- dynamic funcOffset/4.
-:- index(thisCallMethod/3, [1,3]).
 :- dynamic thisCallMethod/3.
-:- index(methodMemberAccess/4, [2+3,2]).
 :- dynamic methodMemberAccess/4.
 :- dynamic returnsSelf/1.
 :- dynamic noCallsBefore/1.
 :- dynamic noCallsAfter/1.
 :- dynamic uninitializedReads/1.
-:- index(possibleVFTableWrite/4, [2,4]).
 :- dynamic possibleVFTableWrite/4.
-%:- index(possibleVFTableEntry/3, [1,2,3]).
 %:- dynamic possibleVFTableEntry/3.
-:- index(possibleVBTableWrite/4, [1,2,3,4]).
 :- dynamic possibleVBTableWrite/4.
-%:- index(possibleVBTableEntry/3, [1,2,3]).
 %:- dynamic possibleVBTableEntry/3.
-:- index(possibleVirtualFunctionCall/5, [1,2,3,4,5]).
 :- dynamic possibleVirtualFunctionCall/5.
-:- index(rTTICompleteObjectLocator/6, [3,1]).
 :- dynamic rTTICompleteObjectLocator/6.
-:- index(rTTITypeDescriptor/3, [1]).
 :- dynamic rTTITypeDescriptor/3.
-:- index(rTTIClassHierarchyDescriptor/3, [1]).
 :- dynamic rTTIClassHierarchyDescriptor/3.
-:- index(rTTIBaseClassDescriptor/7, [1,2]).
 :- dynamic rTTIBaseClassDescriptor/7.
-:- index(thisPtrAllocation/5, [3]).
 :- dynamic thisPtrAllocation/5.
-:- index(thisPtrUsage/4, [2+3,3,4]).
 :- dynamic thisPtrUsage/4.
-:- index(thisPtrOffset/3, [3,1]).
 :- dynamic thisPtrOffset/3.
 :- dynamic purecall/1.
-:- index(insnCallsDelete/3, [2]).
 :- dynamic insnCallsDelete/3.
-:- index(symbolGlobalObject/3, [1,2,3]).
 :- dynamic symbolGlobalObject/3.
-:- index(symbolClass/3, [1,2,3]).
 :- dynamic symbolClass/3.
-:- index(symbolProperty/2, [2]).
 :- dynamic symbolProperty/2.
-:- index(thunk/2, [1,2]).
 :- dynamic thunk/2 as abstract(0).
-:- index(intialMemory/2, [1]).
 :- dynamic initialMemory/2.
 
-:- index(funcParameter/3, [1+2]).
 :- dynamic funcParameter/3.
-:- index(funcReturn/3, [1,2,3]).
 :- dynamic funcReturn/3.
-:- index(callingConvention/2, [1,2]).
 :- dynamic callingConvention/2.
-:- index(callTarget/3, [2]).
 :- dynamic callTarget/3.
-:- index(callParameter/4, [1,2,3,4]).
 :- dynamic callParameter/4.
-:- index(callReturn/4, [1,2,3,4]).
 :- dynamic callReturn/4.
 
 % For Debugging, not for rules!
-%:- index(termDebug/2, [1,2]).
 %:- dynamic termDebug/2 as incremental.
 
 % ============================================================================================
@@ -89,60 +61,39 @@
 :- dynamic factDeletingDestructor/1 as incremental.
 :- dynamic factNOTDeletingDestructor/1 as incremental.
 
-:- index(factVirtualFunctionCall/5, [1]).
 :- dynamic factVirtualFunctionCall/5 as incremental.
-:- index(factNOTVirtualFunctionCall/5, [1,2,3,4,5]).
 :- dynamic factNOTVirtualFunctionCall/5 as incremental.
 :- dynamic factVFTable/1 as incremental.
 :- dynamic factNOTVFTable/1 as incremental.
-:- index(factVFTableWrite/4, [1,2,4,3]).
 :- dynamic factVFTableWrite/4 as incremental,abstract(0).
-:- index(factVFTableOverwrite/3, [2,1]).
 :- dynamic factVFTableOverwrite/3 as incremental.
-:- index(factVFTableEntry/3, [1+2,3,1]).
 :- dynamic factVFTableEntry/3 as incremental.
-:- index(factNOTVFTableEntry/3, [1]).
 :- dynamic factNOTVFTableEntry/3 as incremental.
-:- index(factVFTableSizeGTE/2, [1]).
 :- dynamic factVFTableSizeGTE/2 as incremental.
-:- index(factVFTableSizeLTE/2, [1]).
 :- dynamic factVFTableSizeLTE/2 as incremental.
 
 :- dynamic factVBTable/1 as incremental.
 :- dynamic factNOTVBTable/1 as incremental.
-:- index(factVBTableWrite/4, [1,2,3,4]).
 :- dynamic factVBTableWrite/4 as incremental.
-:- index(factVBTableEntry/3, [1,2,3]).
 :- dynamic factVBTableEntry/3 as incremental.
-:- index(factNOTVBTableEntry/3, [1,2,3]).
 :- dynamic factNOTVBTableEntry/3 as incremental.
 
-:- index(factObjectInObject/3, [1+2,1]).
 :- dynamic factObjectInObject/3 as incremental.
-:- index(factDerivedClass/3, [1+2,1,2]).
 :- dynamic factDerivedClass/3 as incremental.
-:- index(factNOTDerivedClass/3, [1]).
 :- dynamic factNOTDerivedClass/3 as incremental.
-:- index(factEmbeddedObject/3, [1,2]).
 :- dynamic factEmbeddedObject/3 as incremental.
-:- index(factNOTEmbeddedObject/3, [1+2]).
 :- dynamic factNOTEmbeddedObject/3 as incremental.
-:- index(factClassSizeGTE/2, [1+2,1]).
 :- dynamic factClassSizeGTE/2 as incremental.
-:- index(factClassSizeLTE/2, [1]).
 :- dynamic factClassSizeLTE/2 as incremental.
 :- dynamic factClassHasNoBase/1 as incremental.
 :- dynamic factClassHasUnknownBase/1 as incremental.
-:- index(factNOTMergeClasses/2, [1+2]).
 :- dynamic factNOTMergeClasses/2 as incremental.
-:- index(factClassCallsMethod/2, [1+2,1]).
 :- dynamic factClassCallsMethod/2 as incremental.
 
 % This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
 % putting it in a separate fact, we can make it a trigger-based fact that is maintained with
 % low overhead.
 :- dynamic factMethodInVFTable/3.
-:- index(factMethodInVFTable/3, [1,1+2,3]).
 
 % ============================================================================================
 % Dynamically rewritten facts involving classes.
@@ -242,7 +193,6 @@ classArgs(factClassSizeLTE/2, 1).
 %    error_writeln(['Aborting due to error: ', X]),halt(1).
 
 % Can I put this somewhere else?
-:- index(findint/2, [1, 2, 1+2]).
 :- dynamic findint/2 as incremental.
 
 % ============================================================================================
@@ -266,6 +216,10 @@ classArgs(factClassSizeLTE/2, 1).
 :- include(softcut).
 :- include(class).
 :- include(trigger).
+
+:- if(current_prolog_flag(version_data, xsb(_,_,_,_))).
+:- include(index).
+:- endif.
 
 :- debug_ctl(profile, on).
 :- debug_ctl(prompt, off).

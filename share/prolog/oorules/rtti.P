@@ -1,10 +1,7 @@
 :- import member/2 from lists.
 
-:- index(rTTICompleteObjectLocator/6, [1,2,3,4,5,6]).
 :- dynamic rTTICompleteObjectLocator/6.
-:- index(rTTITypeDescriptor/3, [1,2,3]).
 :- dynamic rTTITypeDescriptor/3.
-:- index(rTTIClassHierarchyDescriptor/3, [1,2,3]).
 :- dynamic rTTIClassHierarchyDescriptor/3.
 :- dynamic rTTIBaseClassDescriptor/8.
 
