@@ -39,10 +39,10 @@ trigger_hook(_X).
 
 % MethodInVFTable, which is a helper for guessMergeClassesB
 dispatchTrigger(factVFTableEntry(VFTable, Offset, Entry), Out) :-
-    setof((Method, Offset, VFTable),
+    setof((VFTable, Offset, Method),
           (reasonMethodInVFTable(VFTable, Offset, Method, Entry),
            not(factMethodInVFTable(VFTable, Offset, Method)),
-           loginfo('Concluding factMethodInVFTable('), loginfo(VFTable), loginfo(', '), loginfo(Method), loginfoln(').')),
+           loginfo('Concluding factMethodInVFTable('), loginfo(VFTable), loginfo(', '), loginfo(Offset), loginfo(', '), loginfo(Method), loginfoln(').')),
           TupleSets),
     maplist(try_assert_builder(factMethodInVFTable), TupleSets, ActionSets),
     Out = all(ActionSets).
