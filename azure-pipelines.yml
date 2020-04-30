@@ -29,4 +29,4 @@ jobs:
       #downloadPath: '$(System.ArtifactsDirectory)'
   - script: wget https://github.com/NationalSecurityAgency/ghidra/archive/Ghidra_9.1.2_build.tar.gz
   - script: tar -xvzf Ghidra_9.1.2_build.tar.gz
-  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=~/ghidra-Ghidra_9.1.2_build/ ./gradlew
+  - script: PWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(PWD)/ghidra-Ghidra_9.1.2_build/ ./gradlew
