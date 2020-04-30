@@ -28,14 +28,6 @@ jobs:
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
-  - task: JavaToolInstaller@0
-    inputs:
-      versionSpec: "11"
-      jdkArchitectureOption: x64
-      jdkSourceOption: LocalDirectory
-      jdkFile: "/builds/openjdk-11.0.2_linux-x64_bin.tar.gz"
-      jdkDestinationDirectory: "/builds/binaries/externals"
-      cleanDestinationDirectory: true
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
   - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
   - script: unzip ghidra_9.1.2_PUBLIC_20200212.zip
