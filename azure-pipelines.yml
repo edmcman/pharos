@@ -19,10 +19,10 @@ jobs:
     vmImage: 'Ubuntu-16.04'
   steps:
   - task: DownloadGitHubRelease@0
-  inputs:
-    connection: edmcman
-    userRepository: NationalSecurityAgency/ghidra
-    #defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
-    #version: # Required when defaultVersionType != Latest
-    #itemPattern: '**' # Optional
-    #downloadPath: '$(System.ArtifactsDirectory)' 
+    inputs:
+      connection: edmcman
+      userRepository: NationalSecurityAgency/ghidra
+      #defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
+      #version: # Required when defaultVersionType != Latest
+      #itemPattern: '**' # Optional
+      #downloadPath: '$(System.ArtifactsDirectory)' 
