@@ -16,13 +16,14 @@ jobs:
 #   - script: NCPU=2 ./scripts/build.bash -reclaim
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
-  matrix:
-    ghidra912:
-      ghidraVersion: "9.12"
-      ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
-    ghidra911:
-      ghidraVersion: "9.11"
-      ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.1_PUBLIC_20191218.zip"
+  strategy:
+    matrix:
+      ghidra912:
+        ghidraVersion: "9.12"
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
+      ghidra911:
+        ghidraVersion: "9.11"
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.1_PUBLIC_20191218.zip"
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
