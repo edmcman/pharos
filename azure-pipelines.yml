@@ -32,3 +32,6 @@ jobs:
   - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
   - script: unzip ghidra_9.1.2_PUBLIC_20200212.zip
   - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_9.1.2_PUBLIC ./gradlew
+    env:
+      JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
+
