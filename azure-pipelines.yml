@@ -28,6 +28,7 @@ jobs:
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
+  - script: which javac; which java; dpkg -l java*
   - script: sudo apt-get -y update && sudo apt-get -y install openjdk-11-jdk-headless
   - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
   - script: unzip ghidra_9.1.2_PUBLIC_20200212.zip
