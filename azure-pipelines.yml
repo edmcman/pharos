@@ -35,6 +35,6 @@ jobs:
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
   - script: ls tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
-  - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/*.zip
-    artifact: OOAnalyzer.zip
+  - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
+    artifact: OOAnalyzerPlugin
 
