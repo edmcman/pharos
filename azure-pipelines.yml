@@ -16,6 +16,13 @@ jobs:
 #   - script: NCPU=2 ./scripts/build.bash -reclaim
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
+  matrix:
+    ghidra912:
+      ghidraVersion: "9.12"
+      ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
+    ghidra911:
+      ghidraVersion: "9.11"
+      ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.1_PUBLIC_20191218.zip"
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
@@ -29,9 +36,11 @@ jobs:
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
-  - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
-  - script: unzip ghidra_9.1.2_PUBLIC_20200212.zip
-  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_9.1.2_PUBLIC ./gradlew
+  - script: wget $URL # https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
+    env:
+      URL: $(ghidraUrl)
+  - script: unzip *.zip
+  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_* ./gradlew
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
