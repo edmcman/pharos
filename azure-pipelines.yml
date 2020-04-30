@@ -23,6 +23,6 @@ jobs:
       connection: edmcman
       userRepository: NationalSecurityAgency/ghidra
       defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
-      #version: # Required when defaultVersionType != Latest
+      version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)' 
