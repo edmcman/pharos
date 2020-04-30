@@ -26,4 +26,8 @@ jobs:
       version: '*'
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
-      #downloadPath: '$(System.ArtifactsDirectory)' 
+      #downloadPath: '$(System.ArtifactsDirectory)'
+  - script: wget https://github.com/NationalSecurityAgency/ghidra/archive/Ghidra_9.1.2_build.tar.gz
+  - script: tar -xvzf Ghidra_9.1.2_build.tar.gz
+  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin
+  - script: ls
