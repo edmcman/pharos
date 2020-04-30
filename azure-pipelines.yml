@@ -13,3 +13,16 @@ jobs:
   - script: sudo apt-get -y install sudo build-essential wget flex ghostscript bzip2 git subversion automake libtool bison python libncurses-dev vim-common sqlite3 libsqlite3-0 libsqlite3-dev zlib1g-dev cmake libyaml-cpp-dev libboost-all-dev libboost-dev libxml2-dev ninja-build
   - script: NCPU=2 ./scripts/build_prereqs.bash -reclaim
   - script: NCPU=2 ./scripts/build.bash -reclaim
+
+- job: Build OOAnalyzer Ghidra Plugin
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  steps:
+  - task: DownloadGitHubRelease@0
+  inputs:
+    connection: edmcman
+    userRepository: NationalSecurityAgency/ghidra
+    #defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
+    #version: # Required when defaultVersionType != Latest
+    #itemPattern: '**' # Optional
+    #downloadPath: '$(System.ArtifactsDirectory)' 
