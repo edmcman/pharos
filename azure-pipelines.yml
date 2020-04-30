@@ -28,9 +28,7 @@ jobs:
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
-  - script: which javac; which java; dpkg -l java*; dpkg -l default*; ls -l /usr/bin/javac; dpkg -l *jdk*
-  - script: update-alternatives --list javac; update-alternatives --list java
-  - script: sudo apt-get -y update && sudo apt-get -y purge java-common && sudo apt-get -y install openjdk-11-jdk-headless
+  - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java
   - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
   - script: unzip ghidra_9.1.2_PUBLIC_20200212.zip
   - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_9.1.2_PUBLIC ./gradlew
