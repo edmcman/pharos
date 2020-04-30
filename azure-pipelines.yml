@@ -19,11 +19,19 @@ jobs:
   strategy:
     matrix:
       ghidra912:
-        ghidraVersion: "9.12"
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
       ghidra911:
-        ghidraVersion: "9.11"
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.1_PUBLIC_20191218.zip"
+      ghidra91:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.1_PUBLIC_20191023.zip"
+      ghidra904:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.4_PUBLIC_20190516.zip"
+      ghidra902:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.2_PUBLIC_20190403.zip"
+      ghidra901:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.1_PUBLIC_20190325.zip"
+      ghidra90:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
@@ -41,7 +49,7 @@ jobs:
     env:
       URL: $(ghidraUrl)
   - script: unzip *.zip
-  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_* ./gradlew
+  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && (GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_* ; ./gradlew)
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
