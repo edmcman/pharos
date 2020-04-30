@@ -23,6 +23,7 @@ jobs:
       connection: Github read only
       userRepository: NationalSecurityAgency/ghidra
       defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
+      version: '*'
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)' 
