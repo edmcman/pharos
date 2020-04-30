@@ -18,12 +18,12 @@ jobs:
   pool:
     vmImage: 'Ubuntu-16.04'
   steps:
-  - task: DownloadGitHubRelease@0
-    inputs:
-      connection: Github read only
-      userRepository: NationalSecurityAgency/ghidra
-      defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
-      version: '*'
+  # - task: DownloadGitHubRelease@0
+  #   inputs:
+  #     connection: Github read only
+  #     userRepository: NationalSecurityAgency/ghidra
+  #     defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
+  #     version: '*'
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
