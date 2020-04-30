@@ -14,7 +14,7 @@ jobs:
   - script: NCPU=2 ./scripts/build_prereqs.bash -reclaim
   - script: NCPU=2 ./scripts/build.bash -reclaim
 
-- job: Build OOAnalyzer Ghidra Plugin
+- job: Build_OOAnalyzer_Ghidra_Plugin
   pool:
     vmImage: 'Ubuntu-16.04'
   steps:
