@@ -20,7 +20,7 @@ jobs:
   steps:
   - task: DownloadGitHubRelease@0
     inputs:
-      connection: edmcman
+      connection: Github read only
       userRepository: NationalSecurityAgency/ghidra
       defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
