@@ -34,7 +34,6 @@ jobs:
   - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_9.1.2_PUBLIC ./gradlew
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
-  - script: ls tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
     artifact: OOAnalyzerPlugin
 
