@@ -28,7 +28,6 @@ jobs:
       #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
       #itemPattern: '**' # Optional
       #downloadPath: '$(System.ArtifactsDirectory)'
-  - script: wget https://github.com/NationalSecurityAgency/ghidra/archive/Ghidra_9.1.2_build.tar.gz
-  - script: tar -xvzf Ghidra_9.1.2_build.tar.gz
-  - script: pwd && ls
-  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra-Ghidra_9.1.2_build/ ./gradlew
+  - script: wget https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
+  - script: unzip -l ghidra_9.1.2_PUBLIC_20200212.zip
+  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$OLDPWD/ghidra_9.1.2_PUBLIC ./gradlew
