@@ -105,7 +105,7 @@ jobs:
       path: $(GRADLE_USER_HOME)
     displayName: Gradle build cache
 
-    - bash: |
+  - bash: |
       test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip zip/*.zip
     condition: ne(variables['ghidraUrl'], '')
