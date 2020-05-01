@@ -1448,8 +1448,8 @@ public class OOAnalyzer {
 							if (demangledObj != null) {
 								demangledName = demangledObj.toString().replace("\n", "\\n");
                                                                 try {
-                                                                  demangledObj.getClass ().getMethod("getNamespaceString");
-                                                                  namespace = demangledObj.getNamespaceString();
+                                                                  Method m = demangledObj.getClass ().getMethod("getNamespaceString");
+                                                                  namespace = (String) m.invoke (demangledObj);
                                                                 }
                                                                 catch (NoSuchMethodException e) {
                                                                   namespace = demangledObj.getNamespace().toNamespace();
