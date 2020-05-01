@@ -46,7 +46,9 @@ jobs:
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
       URL: $(ghidraUrl)
-  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
+  - bash: |
+      echo ok $JAVA_HOME $WS $HOME
+      cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
       WS: $(Pipeline.Workspace)
