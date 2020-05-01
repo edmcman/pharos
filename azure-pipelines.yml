@@ -119,9 +119,10 @@ jobs:
       sudo apt-get -y install bison flex
       git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
       cd ghidra
-      gradle --build-cache --init-script gradle/support/fetchDependencies.gradle init
-      gradle --build-cache prepDev
-      gradle --build-cache buildNatives_linux64
+      gradle --build-cache buildGhidra
+      #gradle --build-cache --init-script gradle/support/fetchDependencies.gradle init
+      #gradle --build-cache prepDev
+      #gradle --build-cache buildNatives_linux64
     condition: eq(variables['ghidraUrl'], '')
     workingDirectory: $(Pipeline.Workspace)
     displayName: Download and build Ghidra from git
