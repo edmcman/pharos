@@ -38,6 +38,7 @@ import com.google.gson.stream.JsonReader;
 
 import ghidra.app.util.demangler.CharacterIterator;
 import ghidra.app.util.demangler.DemangledObject;
+import ghidra.app.util.demangler.DemangledType;
 import ghidra.app.util.demangler.Demangler;
 import ghidra.app.util.demangler.microsoft.MicrosoftDemangler;
 import ghidra.program.database.data.DataTypeUtilities;
@@ -1453,7 +1454,7 @@ public class OOAnalyzer {
                                                                 }
                                                                 catch (NoSuchMethodException e) {
                                                                   //java.lang.reflect.Method m = demangledObj.getClass ().getMethod("
-                                                                  ghidra.app.util.demangler.DemangledType ns = demangledObj.getNamespace ();
+                                                                  DemangledType ns = demangledObj.getNamespace ();
                                                                   java.lang.reflect.Method m = ns.getClass ().getMethod("toNamespace");
                                                                   namespace = (String) (m.invoke (ns));
                                                                 }
