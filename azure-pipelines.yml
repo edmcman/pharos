@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
 
 jobs:
-- job: Build
+- job: Build Prereqs
   variables:
     CCACHE_DIR: $(Pipeline.Workspace)/cache
   timeoutInMinutes: 660
@@ -21,11 +21,42 @@ jobs:
 
   - task: Cache@2
     inputs:
-      key: 'ccache | "$(Agent.OS)"'
+      key: 'ccache | "$(Agent.OS)" | "$(System.JobName)"'
       path: $(CCACHE_DIR)
     displayName: ccache
   - script: NCPU=2 ./scripts/build_prereqs.bash -reclaim
     displayName: Build prereqs
+  - publish: /usr/local
+    artifact: Prereqs
+#  - script: NCPU=2 ./scripts/build.bash -reclaim
+#    displayName: Build pharos
+
+- job: Build Pharos
+  dependsOn: Build Prereqs
+  variables:
+    CCACHE_DIR: $(Pipeline.Workspace)/cache
+  timeoutInMinutes: 660
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  steps:
+  - script: sudo apt-get -y update
+  - bash: |
+      sudo apt-get install ccache -y
+      echo "##vso[task.prependpath]/usr/lib/ccache"
+    displayName: Install ccache and update PATH to use linked versions of gcc, cc, etc
+  - script: sudo apt-get -y install sudo build-essential wget flex ghostscript bzip2 git subversion automake libtool bison python libncurses-dev vim-common sqlite3 libsqlite3-0 libsqlite3-dev zlib1g-dev cmake libyaml-cpp-dev libboost-all-dev libboost-dev libxml2-dev ninja-build
+    displayName: Install prereqs
+
+  - task: Cache@2
+    inputs:
+      key: 'ccache | "$(Agent.OS)" | "$(System.JobName)"'
+      path: $(CCACHE_DIR)
+    displayName: ccache
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      source: current
+      artifact: Prereqs
+      path: /usr/local
   - script: NCPU=2 ./scripts/build.bash -reclaim
     displayName: Build pharos
 
