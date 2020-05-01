@@ -116,6 +116,20 @@ jobs:
   - bash: |
       sudo apt-get -y install bison flex
       git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
+    condition: eq(variables['ghidraUrl'], '')
+    workingDirectory: $(Pipeline.Workspace)
+    env:
+      JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
+      WS: $(Pipeline.Workspace)
+    displayName: Download and build Ghidra from git part 1
+
+  - task: Cache@2
+    inputs:
+      key: 'gradle deps'
+      path: ghidra/build/downloads
+    condition: eq(variables['ghidraUrl'], '')
+
+  - bash: |
       cd ghidra
       gradle --build-cache --init-script gradle/support/fetchDependencies.gradle init
       gradle --build-cache buildGhidra
@@ -128,7 +142,7 @@ jobs:
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
       WS: $(Pipeline.Workspace)
-    displayName: Download and build Ghidra from git
+    displayName: Download and build Ghidra from git part 2
   - bash: |
       GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') gradle --build-cache
     displayName: Build Ghidra plugin
