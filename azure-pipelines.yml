@@ -123,6 +123,7 @@ jobs:
       gradle --build-cache buildGhidra
       mkdir -p $WS/zip
       cp build/dist/*.zip $WS/zip/
+      cd $WS
       unzip zip/*.zip
     condition: eq(variables['ghidraUrl'], '')
     workingDirectory: $(Pipeline.Workspace)
