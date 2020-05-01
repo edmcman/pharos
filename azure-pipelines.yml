@@ -28,8 +28,6 @@ jobs:
     displayName: Build prereqs
   - publish: /usr/local
     artifact: Prereqs
-#  - script: NCPU=2 ./scripts/build.bash -reclaim
-#    displayName: Build pharos
 
 - job: Build_Pharos
   dependsOn: Build_Prereqs
@@ -65,8 +63,8 @@ jobs:
     GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
   strategy:
     matrix:
-      # ghidra-git:
-      #   ghidraVersion: "git master"
+      ghidra-git:
+        ghidraVersion: "git master"
       ghidra912:
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
         ghidraVersion: "9.1.2"
