@@ -95,7 +95,7 @@ jobs:
   - bash: |
       test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip zip/*.zip
-    condition: ne(variables['ghidraUrl'], null)
+    condition: ne(variables['ghidraUrl'], Null)
     workingDirectory: $(Pipeline.Workspace)
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
