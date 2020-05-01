@@ -1454,7 +1454,7 @@ public class OOAnalyzer {
                                                                 }
                                                                 catch (NoSuchMethodException e) {
                                                                   //java.lang.reflect.Method m = demangledObj.getClass ().getMethod("
-                                                                  DemangledType ns = demangledObj.getNamespace ();
+                                                                  var ns = demangledObj.getNamespace ();
                                                                   java.lang.reflect.Method m = ns.getClass ().getMethod("toNamespace");
                                                                   namespace = (String) (m.invoke (ns));
                                                                 }
