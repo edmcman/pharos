@@ -85,3 +85,4 @@ jobs:
       tag: ghidra-$(ghidraVersion)
       title: OOAnalyzer Ghidra Plugin for Ghidra $(ghidraVersion)
       assets: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/*.zip
+      addChangeLog: false
