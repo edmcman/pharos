@@ -61,6 +61,8 @@ jobs:
     displayName: Build pharos
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
+  variables:
+    GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
   strategy:
     matrix:
       ghidra-git:
@@ -90,11 +92,20 @@ jobs:
     vmImage: 'Ubuntu-18.04'
   steps:
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
+
   - task: Cache@2
     inputs:
       key: '"$(ghidraUrl)" | binary'
       path: $(Pipeline.Workspace)/zip
-  - bash: |
+
+  - task: Cache@2
+    inputs:
+      key: 'gradle | "$(Agent.OS)" | "$(System.JobName)"'
+      restoreKeys: gradle
+      path: $(GRADLE_USER_HOME)
+    displayName: Gradle build cache
+
+    - bash: |
       test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip zip/*.zip
     condition: ne(variables['ghidraUrl'], '')
@@ -106,18 +117,19 @@ jobs:
       sudo apt-get -y install bison
       git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
       cd ghidra
-      gradle --init-script gradle/support/fetchDependencies.gradle init
-      gradle prepDev
-      gradle buildNatives_linux64
+      gradle --build-cache --init-script gradle/support/fetchDependencies.gradle init
+      gradle --build-cache prepDev
+      gradle --build-cache buildNatives_linux64
     condition: eq(variables['ghidraUrl'], '')
     workingDirectory: $(Pipeline.Workspace)
     displayName: Download and build Ghidra from git
   - bash: |
-      cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') gradle
+      cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') gradle --build-cache
     displayName: Build Ghidra plugin
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
       WS: $(Pipeline.Workspace)
+  - script: gradle --stop
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
   - task: GitHubRelease@0
     inputs:
