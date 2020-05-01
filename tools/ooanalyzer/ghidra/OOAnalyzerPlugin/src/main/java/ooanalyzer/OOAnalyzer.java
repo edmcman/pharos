@@ -1447,7 +1447,12 @@ public class OOAnalyzer {
 							demangledObj = demangler.demangle(name, true);
 							if (demangledObj != null) {
 								demangledName = demangledObj.toString().replace("\n", "\\n");
-								namespace = demangledObj.getNamespaceString();
+                                                                try {
+                                                                  namespace = demangledObj.getClass.getMethod("getNamespaceString") ();
+                                                                }
+                                                                catch (NoSuchMethodException e) {
+                                                                  namespace = demangledObj.getNamespace().toNamespace();
+                                                                }
 							} else {
 								JsonElement jElm = jsonObject.get(demangledNameJSONString);
 								if (jElm != null) {
