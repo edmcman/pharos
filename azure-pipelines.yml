@@ -39,10 +39,11 @@ jobs:
   - task: Cache@2
     inputs:
       key: '"$(ghidraUrl)" | binary'
-      path: zip
+      path: $(Pipeline.Workspace)/zip
   - bash: |
       test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip zip/*.zip
+    workingDirectory: $(Pipeline.Workspace)
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
       URL: $(ghidraUrl)
