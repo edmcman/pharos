@@ -63,6 +63,8 @@ jobs:
 - job: Build_OOAnalyzer_Ghidra_Plugin
   strategy:
     matrix:
+      ghidra-git:
+        ghidraVersion: "git master"
       ghidra912:
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip"
         ghidraVersion: "9.1.2"
