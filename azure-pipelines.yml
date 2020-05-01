@@ -35,21 +35,18 @@ jobs:
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
-  # - task: DownloadGitHubRelease@0
-  #   inputs:
-  #     connection: Github read only
-  #     userRepository: NationalSecurityAgency/ghidra
-  #     defaultVersionType: 'latest' # Options: latest, specificVersion, specificTag
-  #     version: '*'
-      #version: 'Ghidra_9.1.2_build' # Required when defaultVersionType != Latest
-      #itemPattern: '**' # Optional
-      #downloadPath: '$(System.ArtifactsDirectory)'
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
-  - script: wget $URL # https://ghidra-sre.org/ghidra_9.1.2_PUBLIC_20200212.zip
+  - task: Cache@2
+    inputs:
+      key: '"$(ghidraUrl)" | binary'
+  - bash: |
+      test -f $(basename $URL) || wget $URL
+      unzip *.zip
+    displayName: Download Ghidra binary from $(ghidraUrl)
     env:
       URL: $(ghidraUrl)
-  - script: unzip *.zip
-  - script: OLDPWD=$PWD; cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $OLDPWD -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
+  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $DIR -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
+      DIR: $(Pipeline.Workspace)
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
