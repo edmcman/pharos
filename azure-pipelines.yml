@@ -79,6 +79,15 @@ jobs:
     inputs:
       gitHubConnection: edmcman
       repositoryName: $(Build.Repository.Name)
+      action: delete
+      target: $(Build.SourceVersion)
+      tagSource: manual
+      tag: ghidra-$(ghidraVersion)
+    continueOnError: true
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: edmcman
+      repositoryName: $(Build.Repository.Name)
       action: create
       target: $(Build.SourceVersion)
       tagSource: manual
