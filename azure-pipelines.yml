@@ -103,6 +103,7 @@ jobs:
     env:
       URL: $(ghidraUrl)
   - bash: |
+      sudo apt-get -y install bison
       git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
       cd ghidra
       gradle --init-script gradle/support/fetchDependencies.gradle init
