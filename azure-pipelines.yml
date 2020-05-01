@@ -94,9 +94,11 @@ jobs:
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
 
   - task: Cache@2
+    condition: ne(variables['ghidraUrl'], '')
     inputs:
       key: '"$(ghidraUrl)" | binary'
       path: $(Pipeline.Workspace)/zip
+    displayName: Cache ghidra binary
 
   - task: Cache@2
     inputs:
