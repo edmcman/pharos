@@ -6,6 +6,20 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 NCPU="${NCPU:-1}"
 
+# BOOST
+if [ "$COMPILE_BOOST" != "" ]
+then
+   test -d boost && sudo rm -rf boost
+   mkdir boost
+   cd boost
+   wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2
+   tar -xjf boost_1_64_0.tar.bz2
+   cd boost_1_64_0
+   ./bootstrap.sh --prefix=/usr/local --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave
+   sudo ./b2 -j $NCPU toolset=gcc cxxflags="-std=c++11" install
+   test "$1" = "-reclaim" && sudo rm -rf $DIR/boost
+fi
+
 # XSB
 cd $DIR
 test -d XSB && sudo rm -rf XSB
