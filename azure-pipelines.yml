@@ -39,14 +39,15 @@ jobs:
   - task: Cache@2
     inputs:
       key: '"$(ghidraUrl)" | binary'
+      path: zip
   - bash: |
-      test -f $(basename $URL) || wget $URL
+      test -d zip || (cd zip && wget $URL)
       unzip *.zip
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
       URL: $(ghidraUrl)
-  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $DIR -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
+  - script: cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
-      DIR: $(Pipeline.Workspace)
+      WS: $(Pipeline.Workspace)
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
