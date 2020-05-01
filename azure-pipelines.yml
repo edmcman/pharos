@@ -4,7 +4,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
 
 jobs:
-- job: Build Prereqs
+- job: Build_Prereqs
   variables:
     CCACHE_DIR: $(Pipeline.Workspace)/cache
   timeoutInMinutes: 660
@@ -31,8 +31,8 @@ jobs:
 #  - script: NCPU=2 ./scripts/build.bash -reclaim
 #    displayName: Build pharos
 
-- job: Build Pharos
-  dependsOn: Build Prereqs
+- job: Build_Pharos
+  dependsOn: Build_Prereqs
   variables:
     CCACHE_DIR: $(Pipeline.Workspace)/cache
   timeoutInMinutes: 660
