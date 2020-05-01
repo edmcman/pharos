@@ -1452,7 +1452,10 @@ public class OOAnalyzer {
                                                                   namespace = (String) (m.invoke (demangledObj));
                                                                 }
                                                                 catch (NoSuchMethodException e) {
-                                                                  namespace = demangledObj.getNamespace().toNamespace();
+                                                                  //java.lang.reflect.Method m = demangledObj.getClass ().getMethod("
+                                                                  Demanged ns = demangledObj.getNameSpace ();
+                                                                  java.lang.reflect.Method m = ns.getClass ().getMethod("toNamespace");
+                                                                  namespace = (String) (m.invoke (ns));
                                                                 }
 							} else {
 								JsonElement jElm = jsonObject.get(demangledNameJSONString);
