@@ -15,7 +15,7 @@ then
    wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.bz2
    tar -xjf boost_1_64_0.tar.bz2
    cd boost_1_64_0
-   ./bootstrap.sh --prefix=/usr/local --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave
+   ./bootstrap.sh --prefix=/usr/local --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave cxxflags="-std=c++11" linkflags="-std=c++11"
    sudo ./b2 -j $NCPU toolset=gcc cxxflags="-std=c++11" install
    test "$1" = "-reclaim" && sudo rm -rf $DIR/boost
 fi
