@@ -103,7 +103,7 @@ jobs:
     env:
       URL: $(ghidraUrl)
   - bash: |
-      git clone --depth 0 https://github.com/NationalSecurityAgency/ghidra
+      git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
       cd ghidra
       gradle --init-script gradle/support/fetchDependencies.gradle init
       gradle prepDev
