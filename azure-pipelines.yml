@@ -41,7 +41,7 @@ jobs:
       key: '"$(ghidraUrl)" | binary'
       path: zip
   - bash: |
-      test -d zip || (cd zip && wget $URL)
+      test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip *.zip
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
