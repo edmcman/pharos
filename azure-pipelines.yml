@@ -24,7 +24,7 @@ jobs:
       key: 'ccache | "$(Agent.OS)" | "$(System.JobName)"'
       path: $(CCACHE_DIR)
     displayName: ccache
-  - script: NCPU=2 ./scripts/build_prereqs.bash -reclaim
+  - script: NCPU=2 COMPILE_BOOST=yes ./scripts/build_prereqs.bash -reclaim
     displayName: Build prereqs
   - publish: /usr/local
     artifact: Prereqs
