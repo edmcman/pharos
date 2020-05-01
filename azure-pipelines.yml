@@ -101,6 +101,15 @@ jobs:
     env:
       URL: $(ghidraUrl)
   - bash: |
+      git clone --depth 0 https://github.com/NationalSecurityAgency/ghidra
+      cd ghidra
+      gradle --init-script gradle/support/fetchDependencies.gradle init
+      gradle prepDev
+      gradle buildNatives_linux64
+    condition: eq(variables['ghidraUrl'], '')
+    workingDirectory: $(Pipeline.Workspace)
+    displayName: Download and build Ghidra from git
+  - bash: |
       cd tools/ooanalyzer/ghidra/OOAnalyzerPlugin && GHIDRA_INSTALL_DIR=$(find $WS -maxdepth 1 -type d -name 'ghidra_*') ./gradlew
     displayName: Build Ghidra plugin
     env:
