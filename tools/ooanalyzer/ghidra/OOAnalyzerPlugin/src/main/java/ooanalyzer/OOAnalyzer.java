@@ -76,6 +76,7 @@ import ghidra.program.model.symbol.Symbol;
 import ghidra.program.model.symbol.SymbolTable;
 import ghidra.program.model.symbol.SymbolType;
 import ghidra.util.Msg;
+import ghidra.util.Swing;
 import ghidra.util.UniversalID;
 import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.exception.InvalidInputException;
@@ -342,12 +343,18 @@ public class OOAnalyzer {
 		// Pass 4: Update method definition
 		// Pass 5: Update method/vftables
 
-		monitor.initialize(5);
+                monitor.setMessage("Type selection");
+                monitor.initialize(typeList.size ());
 
 		// Pass 1:
 		// Decide which name and tyoe to use
 
-		typeList.forEach(ooaType -> {
+		typeList
+                  .stream ()
+                  .takeWhile (type -> !monitor.isCancelled ())
+                  .forEach(ooaType -> {
+                        monitor.incrementProgress(1);
+                        Swing.allowSwingToProcessEvents();
 
 			// There was class name information in the ghidra-defined methods, try to
 			// use it
@@ -368,15 +375,25 @@ public class OOAnalyzer {
 					() -> Msg.warn(this, "Could not select type for " + ooaTypeName));
 		});
 
+                if (monitor.isCancelled ()) return 0;
 		Msg.info(this, classTypeMap.size() + " types selected out of " + typeList.size()
 				+ " defined in OOAnalyzer JSON file.");
-
-		monitor.incrementProgress(1);
+                monitor.initialize(classTypeMap.size ());
+                monitor.setMessage("Associating symbols with classes");
 
 		// Pass 2:
 		// Associate symbols with the classes
 
-		classTypeMap.forEach((ooaType, ghidraType) -> {
+		classTypeMap
+                  .entrySet ()
+                  .stream ()
+                  .takeWhile (entry -> !monitor.isCancelled ())
+                  .forEach(entry -> {
+                      var ooaType = entry.getKey ();
+                      var ghidraType = entry.getValue ();
+                      monitor.incrementProgress(1);
+                      Swing.allowSwingToProcessEvents();
+
 			if (ghidraType != null) {
 				selectClassSymbol(ghidraType);
 			} else {
@@ -384,37 +401,67 @@ public class OOAnalyzer {
 			}
 		});
 
+                if (monitor.isCancelled ()) return 0;
 		Msg.info(this, "Symbol table updated.");
-		monitor.incrementProgress(1);
+                monitor.initialize(classTypeMap.size ());
+                monitor.setMessage("Updating symbol table");
 
 		// Pass 3:
 		// Fill in the members. This will update the types, but not commit to
 		// the type manager. The reason the types are created in a separate pass
 		// is because some members themselves may be class types
 
-		classTypeMap.forEach((ooaType, ghidraType) -> {
+		classTypeMap
+                  .entrySet ()
+                  .stream ()
+                  .takeWhile (entry -> !monitor.isCancelled ())
+                  .forEach(entry -> {
+                        var ooaType = entry.getKey ();
+                        var ghidraType = entry.getValue ();
+                        monitor.incrementProgress(1);
+                        Swing.allowSwingToProcessEvents();
 			ghidraType.setDescription("C++ Class updated via OOAanalyzer.");
 			analyzeMembers(ooaType, ghidraType);
 		});
+                if (monitor.isCancelled ()) return 0;
 		Msg.info(this, "Type definition complete.");
-		monitor.incrementProgress(1);
+                monitor.initialize(classTypeMap.size ());
+                monitor.setMessage("Updating datatype manager");
 
 		// Pass 4:
 		// The types are now complete (including members). Update the datatype
 		// manager.
 
-		updateTypeManager(classTypeMap.values().stream().toArray(DataType[]::new), true);
+                var ghidraTypeArray = classTypeMap
+                  .values ()
+                  .stream ()
+                  .takeWhile (entry -> !monitor.isCancelled ())
+                  .toArray(DataType[]::new);
+                if (monitor.isCancelled ()) return 0;
+                Swing.allowSwingToProcessEvents();
+		updateTypeManager(ghidraTypeArray, true);
+                if (monitor.isCancelled ()) return 0;
 		Msg.info(this, "Type manager updated.");
+                monitor.initialize(classTypeMap.size ());
+                monitor.setMessage("Updating methods and vftables");
 
 		// Pass 5:
 		// Update methods/vftables
 
-		classTypeMap.forEach((ooaType, ghidraType) -> {
-			analyzeMethods(ghidraType, ooaType.getMethods().orElse(null));
+		classTypeMap
+                  .entrySet ()
+                  .stream ()
+                  .takeWhile (entry -> !monitor.isCancelled ())
+                  .forEach(entry -> {
+                        var ooaType = entry.getKey ();
+                        var ghidraType = entry.getValue ();
+                        monitor.incrementProgress(1);
+                        Swing.allowSwingToProcessEvents();
+                        analyzeMethods(ghidraType, ooaType.getMethods().orElse(null));
 			analyzeVftables(ghidraType, ooaType.getVftables().orElse(null));
 		});
+                if (monitor.isCancelled ()) return 0;
 		Msg.info(this, "Methods and virtual functions analyzed.");
-		monitor.incrementProgress(1);
 
 		return classTypeMap.size();
 	}
@@ -1272,7 +1319,12 @@ public class OOAnalyzer {
 
 		int tid = dataTypeMgr.startTransaction("T");
 		for (var dt : dTypes) {
-			if (useOOAnalyzerPath) {
+                        Swing.allowSwingToProcessEvents ();
+                        if (monitor.isCancelled ()) {
+                                dataTypeMgr.endTransaction(tid, false);
+                                return;
+                        }
+                        else if (useOOAnalyzerPath) {
 				try {
 					if (dt.getCategoryPath().compareTo(ooanalyzerCategory) != 0) {
 						dt.setCategoryPath(ooanalyzerCategory);
@@ -1556,3 +1608,8 @@ public class OOAnalyzer {
 		return "";
 	}
 }
+
+// Local Variables:
+// mode: java
+// c-basic-offset: 8
+// End:

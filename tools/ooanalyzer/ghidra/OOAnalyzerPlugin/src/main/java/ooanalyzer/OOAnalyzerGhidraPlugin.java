@@ -18,12 +18,16 @@ import docking.action.MenuData;
 import ghidra.app.plugin.PluginCategoryNames;
 import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.script.AskDialog;
+import ghidra.framework.cmd.BackgroundCommand;
+import ghidra.framework.model.DomainObject;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
 import ghidra.program.model.listing.Program;
 import ghidra.util.Msg;
 import ooanalyzer.jsontypes.OOAnalyzerType;
+import ghidra.util.task.TaskMonitor;
+
 
 // @formatter:off
 @PluginInfo(status = PluginStatus.STABLE, packageName = OOAnalyzerGhidraPlugin.NAME, category = PluginCategoryNames.ANALYSIS, shortDescription = "CERT OOAnalyzer JSON results importer.", description = "Import and apply CERT OOAnalyzer results to a Ghidra project.")
@@ -47,58 +51,85 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
 		setupActions();
 	}
 
-	/**
-	 * Run the script
-	 */
-	private void configureAndExecute() {
+        public void configureAndExecute() {
+                BackgroundCommand bgcmd = new ImportCommand();
 
-		OOAnalyzerDialog ooaDialog = new OOAnalyzerDialog("OOAnalyzer Settings");
-		OOAnalyzerGhidraPlugin.this.tool.showDialog(ooaDialog);
-		File jsonFile = ooaDialog.getJsonFile();
+                tool.executeBackgroundCommand(bgcmd, currentProgram);
+        }
 
-		if (ooaDialog.isCancelled()) {
-			return;
-		} else if (jsonFile == null) {
-			Msg.showError(this, null, "Error", "Invalid JSON file");
-			return;
-		}
 
-		String baseJsonName = jsonFile.getName().split("\\.(?=[^\\.]+$)")[0];
-		String baseProgName = currentProgram.getName().split("\\.(?=[^\\.]+$)")[0];
-		if (baseJsonName.equalsIgnoreCase(baseProgName) == false) {
-			if (0 != JOptionPane.showConfirmDialog(null, "JSON file name mismatch",
-					"The selected JSON name does not match the executable, continue?", JOptionPane.YES_NO_OPTION,
-					JOptionPane.WARNING_MESSAGE)) {
-				Msg.info(null, "OOAnalyzer cancelled");
-				return;
-			}
-		}
+        class ImportCommand extends BackgroundCommand {
+                ImportCommand() {
+                        super("OOAnalyzer Import", true, true, false);
+                }
 
-		Optional<List<OOAnalyzerType>> optJson = OOAnalyzer.parseJsonFile(jsonFile);
-		if (optJson.isEmpty()) {
-			Msg.showError(this, null, "Error", "Could not load/parse JSON file " + jsonFile.getName());
-		} else {
-			if (OOAnalyzerGhidraPlugin.this.currentProgram != null) {
+                @Override
+		public boolean applyTo(DomainObject obj, TaskMonitor monitor) {
+                        cmdConfigureAndExecute(monitor);
 
-				// Actually run the plugin
-				int result = -1;
-				int tid = OOAnalyzerGhidraPlugin.this.currentProgram.startTransaction("OOA");
-				try {
-					result = OOAnalyzer.execute(optJson.get(), OOAnalyzerGhidraPlugin.this.currentProgram,
-							ooaDialog.useOOAnalyzerNamespace());
-					if (result < 0) {
-						Msg.showError(this, null, "Error", "No current program for OOAnalyzer");
-					} else if (result > 0) {
-						Msg.showInfo(this, null, "Results", "OOAnalyzer loaded " + result + " classes");
-					} else {
-						Msg.showInfo(this, null, "Results", "OOAnalyzer could not find any classes");
-					}
-				} finally {
-					OOAnalyzerGhidraPlugin.this.currentProgram.endTransaction(tid, (result > 0));
-				}
-			}
-		}
-	}
+                        return true;
+                }
+
+                /**
+                 * Run the script
+                 */
+                private void cmdConfigureAndExecute(TaskMonitor monitor) {
+
+                        OOAnalyzerDialog ooaDialog = new OOAnalyzerDialog("OOAnalyzer Settings");
+                        OOAnalyzerGhidraPlugin.this.tool.showDialog(ooaDialog);
+                        File jsonFile = ooaDialog.getJsonFile();
+
+                        if (ooaDialog.isCancelled()) {
+                                return;
+                        } else if (jsonFile == null) {
+                                Msg.showError(this, null, "Error", "Invalid JSON file");
+                                return;
+                        }
+
+                        String baseJsonName = jsonFile.getName().split("\\.(?=[^\\.]+$)")[0];
+                        String baseProgName = currentProgram.getName().split("\\.(?=[^\\.]+$)")[0];
+                        if (baseJsonName.equalsIgnoreCase(baseProgName) == false) {
+                                if (0 != JOptionPane.showConfirmDialog(null, "JSON file name mismatch",
+                                                                       "The selected JSON name does not match the executable, continue?", JOptionPane.YES_NO_OPTION,
+                                                                       JOptionPane.WARNING_MESSAGE)) {
+                                        Msg.info(null, "OOAnalyzer cancelled");
+                                        return;
+                                }
+                        }
+
+                        //monitor.setMessage("Importing!");
+                        Optional<List<OOAnalyzerType>> optJson = OOAnalyzer.parseJsonFile(jsonFile);
+                        if (optJson.isEmpty()) {
+                                Msg.showError(this, null, "Error", "Could not load/parse JSON file " + jsonFile.getName());
+                        } else {
+                                if (OOAnalyzerGhidraPlugin.this.currentProgram != null) {
+
+                                        // Actually run the plugin
+                                        int result = -1;
+                                        int tid = OOAnalyzerGhidraPlugin.this.currentProgram.startTransaction("OOA");
+                                        try {
+                                                OOAnalyzer ooa = new OOAnalyzer (OOAnalyzerGhidraPlugin.this.currentProgram,
+                                                                                 ooaDialog.useOOAnalyzerNamespace());
+                                                ooa.setMonitor (monitor);
+                                                result = ooa.analyzeClasses(optJson.get());
+                                                if (monitor.isCancelled()) {
+                                                        // Do nothing
+                                                } else if (result < 0) {
+                                                        Msg.showError(this, null, "Error", "No current program for OOAnalyzer");
+                                                } else if (result > 0) {
+                                                        Msg.showInfo(this, null, "Results", "OOAnalyzer loaded " + result + " classes");
+                                                } else {
+                                                        Msg.showInfo(this, null, "Results", "OOAnalyzer could not find any classes");
+                                                }
+                                        } finally {
+                                                OOAnalyzerGhidraPlugin.this.currentProgram.endTransaction(tid, (result > 0));
+                                        }
+                                }
+                        }
+                }
+
+
+        }
 
 	private void setupActions() {
 
@@ -132,3 +163,8 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
 	}
 
 }
+
+// Local Variables:
+// mode: java
+// c-basic-offset: 8
+// End:
