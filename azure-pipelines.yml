@@ -9,6 +9,13 @@ variables:
   CXXFLAGS: -std=c++11 -D_GLIBCXX_USE_CXX11_ABI=1
 
 jobs:
+
+- job: Container_Test
+  container: ubuntu:latest
+  steps:
+  - bash: |
+      whoami
+
 - job: Build_Prereqs
   timeoutInMinutes: 660
   pool:
