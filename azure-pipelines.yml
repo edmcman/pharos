@@ -15,6 +15,7 @@ jobs:
   steps:
   - bash: |
       whoami
+      sudo apt -y update
 
 - job: Build_Prereqs
   timeoutInMinutes: 660
