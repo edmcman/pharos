@@ -13,6 +13,8 @@ jobs:
 - job: Container_Test
   container: ubuntu:latest
   steps:
+  - script: sudo apt-get -y update
+  - script: sudo apt -y update
   - bash: |
       whoami
       sudo apt -y update
