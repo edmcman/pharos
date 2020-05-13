@@ -23,7 +23,7 @@ OOMethod::OOMethod(const ImportDescriptor* id) {
   type_ = OOMethodType::UNKN;
   is_virtual_ = false;
   function_ = id->get_function_descriptor();
-  set_name(id->get_name());
+  set_name(id->get_best_name());
 }
 
 void

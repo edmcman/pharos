@@ -163,7 +163,8 @@ OOClassDescriptor::add_method(OOMethodPtr m) {
     }
 
     // Could not demangle class name, so go with the default name;
-    set_name(id->get_name());
+    // XXX: Do we really want to do this?
+    set_name(id->get_best_name());
   }
   methods_.push_back(m);
 }
