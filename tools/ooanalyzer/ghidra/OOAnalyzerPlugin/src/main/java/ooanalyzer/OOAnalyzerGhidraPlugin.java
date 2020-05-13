@@ -75,6 +75,12 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
                  */
                 private void cmdConfigureAndExecute(TaskMonitor monitor) {
 
+                        // Refuse to continue unless program has been analyzed
+                        if (!currentProgram.getOptions(Program.PROGRAM_INFO).getBoolean(Program.ANALYZED, false)) {
+                                Msg.showError(this, null, "Error", "Please run auto analysis before using the OOAnalyzer Ghidra Plugin");
+                                return;
+                        }
+
                         OOAnalyzerDialog ooaDialog = new OOAnalyzerDialog("OOAnalyzer Settings");
                         OOAnalyzerGhidraPlugin.this.tool.showDialog(ooaDialog);
                         File jsonFile = ooaDialog.getJsonFile();
