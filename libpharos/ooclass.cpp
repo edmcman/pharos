@@ -141,6 +141,8 @@ OOClassDescriptor::add_method(OOMethodPtr m) {
 
   if (m->is_import()) {
 
+    bool name_set = false;
+
     // if this is an import, then it may have a mangled name for the
     // owning class. There is no way to get the mangled class name right now, so
     const ImportDescriptor* id = m->get_import_descriptor();
@@ -153,6 +155,7 @@ OOClassDescriptor::add_method(OOMethodPtr m) {
         std::string current_name = get_name();
         if (current_name != dtype->get_class_name()) {
           set_name(dtype->get_class_name());
+	  name_set = true;
         }
       }
     }
@@ -162,9 +165,16 @@ OOClassDescriptor::add_method(OOMethodPtr m) {
       // been a mangled name.
     }
 
-    // Could not demangle class name, so go with the default name;
-    // XXX: Do we really want to do this?
-    set_name(id->get_best_name());
+    if (!name_set) {
+      // If the method is imported, but we couldn't demangle the class
+      // name, what should we do?  We do know the imported DLL name, and
+      // the symbol or ordinal.  We were previously naming the class
+      // after the imported method, but this doesn't seem quite right,
+      // so I'm going to turn it off for now.
+#if 0
+      set_name(id->get_best_name());
+#endif
+    }
   }
   methods_.push_back(m);
 }
