@@ -76,7 +76,6 @@ import ghidra.program.model.symbol.Symbol;
 import ghidra.program.model.symbol.SymbolTable;
 import ghidra.program.model.symbol.SymbolType;
 import ghidra.util.Msg;
-import ghidra.util.Swing;
 import ghidra.util.UniversalID;
 import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.exception.InvalidInputException;
@@ -215,7 +214,29 @@ public class OOAnalyzer {
 		}
 	}
 
-	/**
+        /**
+         * Wrapper to call allowSwingToProcessEvents, which moved
+         * after 9.0.4
+         */
+        public void allowSwingToProcessEvents() {
+                Class c = null;
+                try {
+                        c = Class.forName("ghidra.util.Swing");
+                } catch (ClassNotFoundException e) {
+                        try {
+                                c = Class.forName("ghidra.util.SystemUtilities");
+                        } catch (ClassNotFoundException e2) {}
+                }
+
+                try
+                {
+                        c.getDeclaredMethod("allowSwingToProcessEvents").invoke(this);
+                } catch (Exception e) {
+                        Msg.warn(this, "Unable to locate allowSwingToProcessEvents. The GUI may be irresponsive.");
+                }
+        }
+
+        /**
 	 * API to run the OOAnalyzer importer
 	 * 
 	 * @param ooaClassList           the class list to import
@@ -354,7 +375,7 @@ public class OOAnalyzer {
                   .takeWhile (type -> !monitor.isCancelled ())
                   .forEach(ooaType -> {
                         monitor.incrementProgress(1);
-                        Swing.allowSwingToProcessEvents();
+                        allowSwingToProcessEvents();
 
 			// There was class name information in the ghidra-defined methods, try to
 			// use it
@@ -392,7 +413,7 @@ public class OOAnalyzer {
                       var ooaType = entry.getKey ();
                       var ghidraType = entry.getValue ();
                       monitor.incrementProgress(1);
-                      Swing.allowSwingToProcessEvents();
+                      allowSwingToProcessEvents();
 
 			if (ghidraType != null) {
 				selectClassSymbol(ghidraType);
@@ -419,7 +440,7 @@ public class OOAnalyzer {
                         var ooaType = entry.getKey ();
                         var ghidraType = entry.getValue ();
                         monitor.incrementProgress(1);
-                        Swing.allowSwingToProcessEvents();
+                        allowSwingToProcessEvents();
 			ghidraType.setDescription("C++ Class updated via OOAanalyzer.");
 			analyzeMembers(ooaType, ghidraType);
 		});
@@ -438,7 +459,7 @@ public class OOAnalyzer {
                   .takeWhile (entry -> !monitor.isCancelled ())
                   .toArray(DataType[]::new);
                 if (monitor.isCancelled ()) return 0;
-                Swing.allowSwingToProcessEvents();
+                allowSwingToProcessEvents();
 		updateTypeManager(ghidraTypeArray, true);
                 if (monitor.isCancelled ()) return 0;
 		Msg.info(this, "Type manager updated.");
@@ -456,7 +477,7 @@ public class OOAnalyzer {
                         var ooaType = entry.getKey ();
                         var ghidraType = entry.getValue ();
                         monitor.incrementProgress(1);
-                        Swing.allowSwingToProcessEvents();
+                        allowSwingToProcessEvents();
                         analyzeMethods(ghidraType, ooaType.getMethods().orElse(null));
 			analyzeVftables(ghidraType, ooaType.getVftables().orElse(null));
 		});
@@ -1319,7 +1340,7 @@ public class OOAnalyzer {
 
 		int tid = dataTypeMgr.startTransaction("T");
 		for (var dt : dTypes) {
-                        Swing.allowSwingToProcessEvents ();
+                        allowSwingToProcessEvents ();
                         if (monitor.isCancelled ()) {
                                 dataTypeMgr.endTransaction(tid, false);
                                 return;
