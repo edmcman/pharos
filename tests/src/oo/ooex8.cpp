@@ -1,5 +1,7 @@
 // Copyright 2016 Carnegie Mellon University.  See LICENSE file for terms.
 
+#include "oohelper.hpp"
+
 /*
 Consider this arrangement:
 
@@ -104,10 +106,13 @@ enssentially bind a parent to a child class at runtime.
 class A {
 public:
   A() {
+    PRINT_CONSTRUCTOR_NAME(A);
     a = 0xa;
     b = 0xb;
     c = 'c';
   }
+  DEFINE_PRINT_DESTRUCTOR(A);
+  DEFINE_PRINT_OPERATOR_DELETE(A);
   int a;
   short b;
   char c;
@@ -116,24 +121,33 @@ public:
 class B : public virtual A {
 public:
   B() {
+    PRINT_CONSTRUCTOR_NAME(B);
     b = 0xB;
   }
+  DEFINE_PRINT_DESTRUCTOR(B);
+  DEFINE_PRINT_OPERATOR_DELETE(B);
   int b;
 };
 
 class C : public virtual A {
 public:
   C() {
+    PRINT_CONSTRUCTOR_NAME(C);
     c = 0xC;
   }
+  DEFINE_PRINT_DESTRUCTOR(C);
+  DEFINE_PRINT_OPERATOR_DELETE(C);
   int c;
 };
 
 class D : public B, public C {
 public:
   D() {
+    PRINT_CONSTRUCTOR_NAME(D);
     d = 0xD;
   }
+  DEFINE_PRINT_DESTRUCTOR(D);
+  DEFINE_PRINT_OPERATOR_DELETE(D);
   int d;
 };
 
@@ -144,10 +158,12 @@ int main () {
   d->b = 42;
   d->c = 43;
   d->d = 44;
+  delete d;
 
-  B *b;
+  B *b = new B();
   b->a = 40;
   b->A::b = -0xb;
+  delete b;
 
 }
 

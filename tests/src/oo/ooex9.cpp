@@ -1,7 +1,8 @@
 // Copyright 2016 Carnegie Mellon University.  See LICENSE file for terms.
 
-/*
+#include "oohelper.hpp"
 
+/*
 
 Combining virtual inheritance with virtual functions
 
@@ -133,8 +134,11 @@ vbi:       class  offset o.vbptr  o.vbte fVtorDisp
 class A {
 public:
   A() {
+    PRINT_CONSTRUCTOR_NAME(A);
     a = 0xa;
   }
+  DEFINE_PRINT_DESTRUCTOR(A);
+  DEFINE_PRINT_OPERATOR_DELETE(A);
   virtual int get_a() {
     return a;
   }
@@ -144,8 +148,11 @@ public:
 class B : public virtual A {
 public:
   B() {
+    PRINT_CONSTRUCTOR_NAME(B);
     b = 0xB;
   }
+  DEFINE_PRINT_DESTRUCTOR(B);
+  DEFINE_PRINT_OPERATOR_DELETE(B);
   virtual int get_b() {
     return b;
   }
@@ -155,8 +162,11 @@ public:
 class C : public virtual A {
 public:
   C() {
+    PRINT_CONSTRUCTOR_NAME(C);
     c = 0xC;
   }
+  DEFINE_PRINT_DESTRUCTOR(C);
+  DEFINE_PRINT_OPERATOR_DELETE(C);
   virtual int get_c() {
     return c;
   }
@@ -166,8 +176,11 @@ public:
 class D : public B, public C {
 public:
   D() {
+    PRINT_CONSTRUCTOR_NAME(D);
     d = 0xD;
   }
+  DEFINE_PRINT_DESTRUCTOR(D);
+  DEFINE_PRINT_OPERATOR_DELETE(D);
   virtual int get_d() {
     return d;
   }
@@ -187,6 +200,7 @@ int main () {
   d->get_c();
   d->get_d();
 
+  delete d;
 
 }
 

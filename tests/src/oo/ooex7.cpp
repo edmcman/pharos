@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include "oohelper.hpp"
 
 using namespace std;
 
@@ -11,8 +12,18 @@ private:
 
 
 public:
-  ObjectTest(int a, int b) {x=a; y=b;}
-  ObjectTest() {x=0; y = 0;}
+  ObjectTest(int a, int b) {
+    PRINT_CONSTRUCTOR_NAME(ObjectTest);
+    x=a;
+    y=b;
+  }
+  ObjectTest() {
+    PRINT_CONSTRUCTOR_NAME(ObjectTest);
+    x=0;
+    y = 0;
+  }
+  DEFINE_PRINT_DESTRUCTOR(ObjectTest);
+  DEFINE_PRINT_OPERATOR_DELETE(ObjectTest);
   int add() {
     return x+y;
   }

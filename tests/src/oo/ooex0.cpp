@@ -1,7 +1,7 @@
 // Copyright 2016 Carnegie Mellon University.  See LICENSE file for terms.
 
 #include <stdlib.h>
-#include <stdio.h>
+#include "oohelper.hpp"
 
 /*
  * This basic class variable and method access
@@ -14,10 +14,12 @@ public:
         int a;
 
   ClassA() {
+    PRINT_CONSTRUCTOR_NAME(ClassA);
     c = d = 42;
     g = 24;
   }
-  ~ClassA() { printf("ClassA::DTOR"); }
+  DEFINE_PRINT_DESTRUCTOR(ClassA);
+  DEFINE_PRINT_OPERATOR_DELETE(ClassA);
   int func1() { return (int)rand(); }
   int func2() { return c + d; }
 

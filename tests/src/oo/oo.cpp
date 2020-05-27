@@ -1,11 +1,16 @@
 // Copyright 2016 Carnegie Mellon University.  See LICENSE file for terms.
 
 #include <iostream>
+#include "oohelper.hpp"
 
 class Cls1 {
 public:
   int x;
   char y;
+
+  DEFINE_PRINT_CONSTRUCTOR(Cls1);
+  DEFINE_PRINT_DESTRUCTOR(Cls1);
+  DEFINE_PRINT_OPERATOR_DELETE(Cls1);
   virtual void func1() {
     std::cout << "Cls1::func1()" << std::endl;
   }
@@ -25,6 +30,9 @@ public:
   struct Str1 s;
   int z;
 
+  DEFINE_PRINT_CONSTRUCTOR(Cls2);
+  DEFINE_PRINT_DESTRUCTOR(Cls2);
+  DEFINE_PRINT_OPERATOR_DELETE(Cls2);
   virtual void func3() {
     std::cout << "Cls2::func3()" << std::endl;
   }
@@ -38,8 +46,11 @@ class Cls3 : public Cls1, public Cls2 {
 public:
   int i;
   Cls3() {
+    PRINT_CONSTRUCTOR_NAME(Cls3);
     i = 42;
   }
+  DEFINE_PRINT_DESTRUCTOR(Cls3);
+  DEFINE_PRINT_OPERATOR_DELETE(Cls3);
   virtual void func1() {
     std::cout << "Cls3::func1()" << std::endl;
   }
