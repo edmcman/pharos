@@ -1705,21 +1705,21 @@ reasonClassHasNoBaseSet(Set) :-
 :- table reasonClassHasUnknownBase_A/1 as incremental.
 :- table reasonClassHasUnknownBase_B/1 as incremental.
 % This was broken up into several triggered rules
-%:- table reasonClassHasUnknownBase_C/8 as incremental.
+:- table reasonClassHasUnknownBase_C1/4 as monotonic.
 :- table reasonClassHasUnknownBase_D/1 as incremental.
 
 % trigger
-%:- table reasonClassHasUnknownBase_E/3 as incremental.
+:- table reasonClassHasUnknownBase_E/3 as monotonic.
 
 reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
     or([reasonClassHasUnknownBase_A(Class),
         reasonClassHasUnknownBase_B(Class),
         % in trigger.P
-        %reasonClassHasUnknownBase_C(Class),
-        reasonClassHasUnknownBase_D(Class)
-      % in trigger.P
-      %reasonClassHasUnknownBase_E(Class)
+        reasonClassHasUnknownBase_C1(Class, _, _, _),
+        reasonClassHasUnknownBase_D(Class),
+        % in trigger.P
+        reasonClassHasUnknownBase_E(Class, _, _)
       ]).
 
 % Because it is already known to be true.
@@ -2366,7 +2366,8 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
 %:- table reasonNOTMergeClasses_D/2 as incremental.
 
 % trigger
-%:- table reasonNOTMergeClasses_E/6 as incremental.
+% has not/1
+:- table reasonNOTMergeClasses_E/6 as monotonic.
 :- table reasonNOTMergeClasses_F/2 as incremental.
 :- table reasonNOTMergeClasses_G/2 as incremental.
 %:- table reasonNOTMergeClasses_H/2 as incremental.
@@ -2376,9 +2377,9 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
 :- table reasonNOTMergeClasses_L/2 as incremental.
 
 % trigger
-%:- table reasonNOTMergeClasses_M/4 as incremental.
+:- table reasonNOTMergeClasses_M/4 as monotonic.
 % trigger
-%:- table reasonNOTMergeClasses_N/4 as incremental.
+:- table reasonNOTMergeClasses_N/4 as monotonic.
 
 :- table reasonNOTMergeClasses_O/2 as incremental.
 :- table reasonNOTMergeClasses_P/2 as incremental.
@@ -2395,7 +2396,7 @@ reasonNOTMergeClasses_new(M1,M2) :-
         reasonNOTMergeClasses_C(M1,M2),
         %reasonNOTMergeClasses_D(M1,M2),
         % _E is now handled in trigger.P
-        %reasonNOTMergeClasses_E(M1,M2),
+        reasonNOTMergeClasses_E(M1,M2,_,_,_,_),
         reasonNOTMergeClasses_F(M1,M2),
         reasonNOTMergeClasses_G(M1,M2),
         %reasonNOTMergeClasses_H(M1,M2),
@@ -2403,9 +2404,9 @@ reasonNOTMergeClasses_new(M1,M2) :-
         reasonNOTMergeClasses_K(M1,M2),
         reasonNOTMergeClasses_L(M1,M2),
         % _M is now handled in trigger.P
-        %reasonNOTMergeClasses_M(M1,M2),
+        reasonNOTMergeClasses_M(M1,M2,_S1,_S2),
         % _N is now handled in trigger.P
-        %reasonNOTMergeClasses_N(M1,M2),
+        reasonNOTMergeClasses_N(M1,M2,_S3,_S4),
         reasonNOTMergeClasses_O(M1,M2),
         reasonNOTMergeClasses_P(M1,M2)
       ]).

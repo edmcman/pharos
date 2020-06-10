@@ -823,15 +823,6 @@ guessNOTMergeClasses(Out) :-
            ClassPairSets),
     Out = tryBinarySearch(tryNOTMergeClasses, tryMergeClasses, ClassPairSets).
 
-%% ejs: There is another definition of tryNOTMergeClasses later in the file!
-%% tryNOTMergeClasses((Class1, Class2)) :- tryNOTMergeClasses(Class1, Class2).
-%% tryNOTMergeClasses(Class1, Class2) :-
-%%     countGuess,
-%%     loginfo('Guessing factNOTMergeClasses('), loginfo(Class1), loginfo(', '),
-%%     loginfo(Class2), loginfoln(').'),
-%%     try_assert(factNOTMergeClasses(Class1, Class2)),
-%%     try_assert(guessedNOTMergeClasses(Class1, Class2)).
-
 % This is one of the strongest of several rules for guessing arbitrary method assignments.  We
 % know that the method is very likely to be assigned to one of the two constructors, so we
 % should guess both right now.  We don't technically know that it's assign to one or the other,
@@ -883,11 +874,17 @@ guessMergeClasses(Out) :-
 
 % trigger
 % XXX: Should this be in rules.P?
-%:- table reasonMethodInVFTable/4 as incremental.
+:- table reasonMethodInVFTable/4 as monotonic.
 reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
-    not(purecall(Entry)),
+    % If Entry is bound, make sure it is not a purecall
+    (nonvar(Entry) -> not(purecall(Entry)); true),
     factVFTableEntry(VFTable, Offset, Entry),
+    % Entry is definitely bound now, so check purecall.
+    not(purecall(Entry)),
     dethunk(Entry, Method).
+
+reasonMethodInVFTable(VFTable, Offset, Method) :-
+    reasonMethodInVFTable(VFTable, Offset, Method, _Entry).
 
 guessMergeClassesB(Class1, Class2) :-
     factVFTableEntry(VFTable, _VFTableOffset, Entry1),
@@ -913,7 +910,7 @@ guessMergeClassesB(Class1, Class2) :-
     % support, Cory decided to allow the second entry to differ so long as it resolved to the
     % same place.  It's unclear if this is really correct.
 
-    forall(factMethodInVFTable(OtherVFTable, _Offset, Method1),
+    forall(reasonMethodInVFTable(OtherVFTable, _Offset, Method1),
            reasonVFTableBelongsToClass(OtherVFTable, _ObjOffset2, Class2)),
 
     find(Method1, Class1),
@@ -1020,20 +1017,17 @@ guessMergeClasses(Out) :-
 % edit distance perspective) grouped with the otehr methods.
 guessMergeClassesF(Class, Method1) :-
     % There are two different entries in the same VFTable...
-    factVFTableEntry(VFTable, _Offset1, Entry1),
-    not(purecall(Entry1)), % Never merge purecall methods into classes.
-    dethunk(Entry1, Method1),
-    not(purecall(Method1)), % Never merge purecall methods into classes.
-    factVFTableEntry(VFTable, _Offset2, Entry2),
-    iso_dif(Entry1, Entry2),
-    not(purecall(Entry2)), % Never merge purecall methods into classes.
-    % Follow thunks for both entries.  What does it mean if the thunks differed but the methods
-    % did not?  Cory's not sure right now, but this is what the original rule did.
-    dethunk(Entry2, Method2),
-    iso_dif(Method1, Method2),
-    not(purecall(Method2)), % Never merge purecall methods into classes.
+    reasonMethodInVFTable(VFTable, _Offset1, Method1),
+
     % One of the methods is in a class all by itself right now.
     findall(Method1, [Method1]),
+
+    reasonMethodInVFTable(VFTable, _Offset2, Method2),
+    iso_dif(Method1, Method2),
+    % Follow thunks for both entries.  What does it mean if the thunks differed but the methods
+    % did not?  Cory's not sure right now, but this is what the original rule did.
+    iso_dif(Method1, Method2),
+
     % So go ahead and merge it into this class..
     find(Method2, Class),
     traceAtLevel('TRACE',
@@ -1269,8 +1263,9 @@ tryNOTRealDestructor(Method) :-
 % The criteria for guessing deleting destructors...
 
 % This rule guesses we're a destructor because we install a vftable and appear to be virtual.
-% We can't tell if we're a deleting or real destructor, but if we guess wrong we'll know
-% immediately because of reasonNOTRealDestructor_H and reasonNOTDeletingDestructor_XXX.
+% We can't tell if we're a deleting or real destructor, but if we guess wrong we'll almost
+% always know immediately because of reasonNOTRealDestructor_H and
+% reasonNOTDeletingDestructor_F.
 likelyAVirtualDestructor(Method) :-
     % Standard destructor requirement
     noCallsAfter(Method),
@@ -1340,10 +1335,10 @@ guessFinalDeletingDestructor(Out) :-
     % destructor based entirely on a common phenomenon in the Visual Studio compiler.
 
     % There are two thunks to Method in VFTable
-    factMethodInVFTable(VFTable, Offset1, Method),
+    reasonMethodInVFTable(VFTable, Offset1, Method),
     % XXX: By binding to _Other_Method instead of Method on the next line, we are preserving a
     % known bug because it seems to produce better results for destructors.
-    factMethodInVFTable(VFTable, Offset2, _Other_Method),
+    reasonMethodInVFTable(VFTable, Offset2, _Other_Method),
     iso_dif(Offset1, Offset2),
 
     % For this rule to apply, there has to be two different entries that thunk to Method
