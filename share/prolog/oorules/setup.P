@@ -30,6 +30,12 @@
 
 :- include('facts.P').
 
+:- dynamic haveSeen/1.
+
+checkSeen(X) :- var(X), !, throw(instantiation_error(X)).
+checkSeen(X) :- haveSeen(X), !.
+checkSeen(X) :- assert(haveSeen(X)), wscontrol(perfchart, marking(X)).
+
 % For Debugging, not for rules!
 %:- dynamic termDebug/2 as incremental.
 
@@ -443,6 +449,7 @@ reasonForwardAsManyTimesAsPossible :-
 
 % Go forward: Make a guess, reason forward, and then sanity check
 tryAGuess :-
+    checkSeen('First guess'),
     logtraceln('reasoningLoop: guess'),
     guess,
     get_flag(numfacts, N),
@@ -591,6 +598,7 @@ solve_internal :-
     guessingDisabled,
     (!,
     loginfoln('Reasoning about object oriented constructs based on known facts ...'),
+    ws_control(perfchart, marking("Initial reasoning")),
     reasonForwardAsManyTimesAsPossible,
     initialSanityChecks,
     loginfoln('No plausible guesses remain, finalizing answer.');
@@ -600,6 +608,7 @@ solve_internal :-
 solve_internal :-
     !,
     (loginfoln('Reasoning about object oriented constructs based on known facts ...'),
+    ws_control(perfchart, marking("Initial reasoning")),
     reasonForwardAsManyTimesAsPossible,
     initialSanityChecks,
     loginfoln('Making new hypothetical guesses ...'),

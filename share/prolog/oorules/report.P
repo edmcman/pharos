@@ -14,11 +14,14 @@ default_user_error_handler(X) :-
     error_writeln(['Aborting due to error: ', X]),halt(1).
 :- else.
 :- use_module(library(dialect/xsb/timed_call), [timed_call/2]).
+:- use_module(library(webstat_control)).
 :- endif.
 
 :- include('setup.P').
 
 psolve_no_halt(X) :-
+    ws_control(perfchart, [clear,interval(5),start]),
+    ws_control(perfchart, marking("Loading data")),
     loadInitialFacts(X),
     (loginfo('Guessing is '), guessingDisabled -> loginfoln('disabled.'); loginfoln('enabled.')),
     (loginfo('Profiling is '), profilingEnabled -> loginfoln('enabled.'); loginfoln('disabled.')),
