@@ -6,6 +6,7 @@ variables:
 
 jobs:
 - job: Build_Prereqs
+  condition: not(variables.buildExes)
   timeoutInMinutes: 660
   pool:
     vmImage: 'Ubuntu-16.04'
@@ -72,6 +73,7 @@ jobs:
     displayName: Build pharos
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
+  condition: not(variables.buildExes)
   variables:
     GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
   strategy:
