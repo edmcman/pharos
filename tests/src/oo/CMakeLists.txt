@@ -14,7 +14,7 @@ if(WIN32)
     message("Unsupported visual studio version. Using cmake defaults.")
   endif()
 
-  cmake_policy(SET CMP0091 new)
+  cmake_policy(SET CMP0091 NEW)
 endif()
 
 
