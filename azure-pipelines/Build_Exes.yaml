@@ -56,6 +56,7 @@ parameters:
 
 jobs:
 - job: Build_Exes_${{parameters.name}}
+  condition: variables.buildExes
   displayName: Build Exes using ${{parameters.displayName}}
   pool:
     vmImage: ${{ parameters.vmImage }}
