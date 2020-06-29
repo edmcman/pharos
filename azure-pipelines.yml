@@ -6,7 +6,6 @@ variables:
 
 jobs:
 - job: Build_Prereqs
-  condition: eq(variables['Build.SourceBranchName'], 'master')
   timeoutInMinutes: 660
   pool:
     vmImage: 'Ubuntu-16.04'
@@ -73,7 +72,6 @@ jobs:
     displayName: Build pharos
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
-  condition: eq(variables['Build.SourceBranchName'], 'master')
   variables:
     GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
   strategy:
@@ -183,6 +181,7 @@ jobs:
   - script: gradle --stop
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
   - task: GitHubRelease@0
+    condition: eq(variables['Build.SourceBranchName'], 'master')
     inputs:
       gitHubConnection: gh
       repositoryName: $(Build.Repository.Name)
@@ -192,6 +191,7 @@ jobs:
       tag: ghidra-$(ghidraVersion)
     continueOnError: true
   - task: GitHubRelease@0
+    condition: eq(variables['Build.SourceBranchName'], 'master')
     inputs:
       gitHubConnection: gh
       repositoryName: $(Build.Repository.Name)
