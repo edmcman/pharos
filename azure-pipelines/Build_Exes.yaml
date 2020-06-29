@@ -89,7 +89,7 @@ jobs:
         mkdir build-${{ v.VARIANT }}
         cd build-${{ v.VARIANT }}
         echo "##vso[task.prependpath]%ProgramFiles%\\cmake\\bin"
-        cmake.exe ${{ v.CMAKEFLAGS }} -E env CXXFLAGS="${{ v.CXXFLAGS }}" cmake.exe -G "${{ parameters.cmakeGenName }}" ..
+        cmake.exe -E env CXXFLAGS="${{ v.CXXFLAGS }}" cmake.exe ${{ v.CMAKEFLAGS }} -G "${{ parameters.cmakeGenName }}" ..
         cmake.exe --build . --verbose --config Debug
         cmake.exe --build . --verbose --config Lite || VER>NUL
         cmake.exe --build . --verbose --config RelWithDebInfo
