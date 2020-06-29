@@ -25,9 +25,9 @@ if(WIN32)
   # Add static option
   option(CMAKE_MSVC_STATIC "Statically link CRT" OFF)
   if(CMAKE_MSVC_STATIC)
-    set(MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   else()
-    set(MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
   endif()
 
   # Add a Lite configuration if we have one
