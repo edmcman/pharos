@@ -5,7 +5,7 @@ parameters:
   cmakeGenName: ""
   vmImage: "windows-latest"
   # Default to 32-bit
-  cmakeAlwaysFlags: "-DCMAKE_GENERATOR_PLATFORM=x86"
+  cmakeAlwaysFlags: "-A win32"
   variants:
     - CXXFLAGS: "/D _CONSTRUCTOR_PRINT /D _DESTRUCTOR_PRINT /D _OPERATOR_DELETE_PRINT"
       VARIANT: "dc1d1o1"
