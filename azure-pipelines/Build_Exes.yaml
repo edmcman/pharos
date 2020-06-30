@@ -4,6 +4,8 @@ parameters:
   displayName: ""
   cmakeGenName: ""
   vmImage: "windows-latest"
+  # Default to 32-bit
+  cmakeAlwaysFlags: "-DCMAKE_GENERATOR_PLATFORM=x86"
   variants:
     - CXXFLAGS: "/D _CONSTRUCTOR_PRINT /D _DESTRUCTOR_PRINT /D _OPERATOR_DELETE_PRINT"
       VARIANT: "dc1d1o1"
@@ -89,7 +91,7 @@ jobs:
         mkdir build-${{ v.VARIANT }}
         cd build-${{ v.VARIANT }}
         echo "##vso[task.prependpath]%ProgramFiles%\\cmake\\bin"
-        cmake.exe -E env CXXFLAGS="${{ v.CXXFLAGS }}" cmake.exe ${{ v.CMAKEFLAGS }} -G "${{ parameters.cmakeGenName }}" ..
+        cmake.exe -E env CXXFLAGS="${{ v.CXXFLAGS }}" cmake.exe ${{ parameters.cmakeAlwaysFlags }} ${{ v.CMAKEFLAGS }} -G "${{ parameters.cmakeGenName }}" ..
         cmake.exe --build . --verbose --config Debug
         cmake.exe --build . --verbose --config Lite || VER>NUL
         cmake.exe --build . --verbose --config RelWithDebInfo
