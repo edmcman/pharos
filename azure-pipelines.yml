@@ -6,7 +6,7 @@ variables:
 
 jobs:
 - job: Build_Prereqs
-  condition: variables.buildNormal
+  condition: and(succeeded(), variables.buildNormal)
   timeoutInMinutes: 660
   pool:
     vmImage: 'Ubuntu-16.04'
@@ -73,7 +73,7 @@ jobs:
     displayName: Build pharos
 
 - job: Build_OOAnalyzer_Ghidra_Plugin
-  condition: variables.buildNormal
+  condition: and(succeeded(), variables.buildNormal)
   variables:
     GRADLE_USER_HOME: $(Pipeline.Workspace)/.gradle
   strategy:
@@ -107,7 +107,7 @@ jobs:
   - script: sudo update-alternatives --set javac /usr/lib/jvm/zulu-11-azure-amd64/bin/javac && sudo update-alternatives --set java /usr/lib/jvm/zulu-11-azure-amd64/bin/java && export JAVA_HOME=/usr/lib/jvm/zulu-11-azure-amd64
 
   - task: Cache@2
-    condition: ne(variables['ghidraUrl'], '')
+    condition: and(succeeded(), ne(variables['ghidraUrl'], ''))
     inputs:
       key: '"$(ghidraUrl)" | binary'
       path: $(Pipeline.Workspace)/zip
@@ -124,7 +124,7 @@ jobs:
       set -e
       test -d zip || (mkdir zip && cd zip && wget $URL)
       unzip zip/*.zip
-    condition: ne(variables['ghidraUrl'], '')
+    condition: and(succeeded(), ne(variables['ghidraUrl'], ''))
     workingDirectory: $(Pipeline.Workspace)
     displayName: Download Ghidra binary from $(ghidraUrl)
     env:
@@ -133,7 +133,7 @@ jobs:
       set -e
       sudo apt-get -y install bison flex xvfb
       git clone --depth 1 https://github.com/NationalSecurityAgency/ghidra
-    condition: eq(variables['ghidraUrl'], '')
+    condition: and(succeeded(), eq(variables['ghidraUrl'], ''))
     workingDirectory: $(Pipeline.Workspace)
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
@@ -144,7 +144,7 @@ jobs:
     inputs:
       key: 'gradle deps'
       path: $(Pipeline.Workspace)/ghidra/build/downloads
-    condition: eq(variables['ghidraUrl'], '')
+    condition: and(succeeded(), eq(variables['ghidraUrl'], ''))
 
   - bash: |
       set -e
@@ -155,7 +155,7 @@ jobs:
       cp build/dist/*.zip $WS/zip/
       cd $WS
       unzip zip/*.zip
-    condition: eq(variables['ghidraUrl'], '')
+    condition: and(succeeded(), eq(variables['ghidraUrl'], ''))
     workingDirectory: $(Pipeline.Workspace)
     env:
       JAVA_HOME: /usr/lib/jvm/zulu-11-azure-amd64
@@ -183,7 +183,7 @@ jobs:
   - script: gradle --stop
   - publish: tools/ooanalyzer/ghidra/OOAnalyzerPlugin/dist/
   - task: GitHubRelease@0
-    condition: eq(variables['Build.SourceBranchName'], 'master')
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
     inputs:
       gitHubConnection: gh
       repositoryName: $(Build.Repository.Name)
@@ -193,7 +193,7 @@ jobs:
       tag: ghidra-$(ghidraVersion)
     continueOnError: true
   - task: GitHubRelease@0
-    condition: eq(variables['Build.SourceBranchName'], 'master')
+    condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
     inputs:
       gitHubConnection: gh
       repositoryName: $(Build.Repository.Name)
