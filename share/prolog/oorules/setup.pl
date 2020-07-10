@@ -356,38 +356,40 @@ mergeClasses(M1, M2) :-
 reasonForward :-
     logdebugln('Starting reasonForward.'),
     (delta_con(reasonForwardSteps, 1); (delta_con(reasonForwardSteps, -1), fail)),
-    once((concludeMethod(Out);
-          concludeVFTableOverwrite(Out);
-          concludeVirtualFunctionCall(Out);
-          concludeConstructor(Out);
-          concludeNOTConstructor(Out);
-          concludeVFTable(Out);
-          concludeVFTableWrite(Out);
-          concludeVFTableEntry(Out);
-          concludeNOTVFTableEntry(Out);
-          concludeVFTableSizeGTE(Out);
-          concludeVFTableSizeLTE(Out);
-          concludeVBTable(Out);
-          concludeVBTableWrite(Out);
-          concludeVBTableEntry(Out);
-          concludeObjectInObject(Out);
-          concludeDerivedClass(Out);
-          concludeNOTDerivedClass(Out);
-          concludeEmbeddedObject(Out);
-          concludeNOTEmbeddedObject(Out);
-          concludeDeletingDestructor(Out);
-          concludeRealDestructor(Out);
-          concludeNOTRealDestructor(Out);
-          concludeClassSizeGTE(Out);
-          concludeClassSizeLTE(Out);
-          concludeClassHasNoBase(Out);
-          concludeClassHasUnknownBase(Out);
-          concludeMergeClasses(Out);
+    possibly_concurrent_find_earliest(Out,
+      [
+          concludeMethod(Out),
+          concludeVFTableOverwrite(Out),
+          concludeVirtualFunctionCall(Out),
+          concludeConstructor(Out),
+          concludeNOTConstructor(Out),
+          concludeVFTable(Out),
+          concludeVFTableWrite(Out),
+          concludeVFTableEntry(Out),
+          concludeNOTVFTableEntry(Out),
+          concludeVFTableSizeGTE(Out),
+          concludeVFTableSizeLTE(Out),
+          concludeVBTable(Out),
+          concludeVBTableWrite(Out),
+          concludeVBTableEntry(Out),
+          concludeObjectInObject(Out),
+          concludeDerivedClass(Out),
+          concludeNOTDerivedClass(Out),
+          concludeEmbeddedObject(Out),
+          concludeNOTEmbeddedObject(Out),
+          concludeDeletingDestructor(Out),
+          concludeRealDestructor(Out),
+          concludeNOTRealDestructor(Out),
+          concludeClassSizeGTE(Out),
+          concludeClassSizeLTE(Out),
+          concludeClassHasNoBase(Out),
+          concludeClassHasUnknownBase(Out),
+          concludeMergeClasses(Out),
           % We should probably be more intelligent about how we order here for trigger
-          concludeTrigger(Out);
-          concludeNOTMergeClasses(Out);
+          concludeTrigger(Out),
+          concludeNOTMergeClasses(Out),
           concludeClassCallsMethod(Out)
-        )),
+      ]),
 
     % At this point we have reasoned and produced a fact to assert.  We will not backtrack into
     % the reasoning because of once/1.
