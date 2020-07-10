@@ -455,41 +455,44 @@ guess :-
         % These three guesses are first on the principle that guesing them has lots of
         % consequences, and that they're probably not wrong, so there's little harm in guessing
         % them first.
-        once((guessVirtualFunctionCall(Out);
-              guessVFTable(Out);
-              guessVBTable(Out);
-              guessDerivedClass(Out);
+
+        possibly_concurrent_find_earliest(Out, 
+          [
+              guessVirtualFunctionCall(Out),
+              guessVFTable(Out),
+              guessVBTable(Out),
+              guessDerivedClass(Out),
 
               % Guess that methods really are methods.  Currently the ordering for this rule was
               % pretty random --  in time to guessing VFTable entries?
-              guessMethod(Out);
+              guessMethod(Out),
 
               % Perhaps both of these should be guessed at once?  They're so closely related that we
               % might get better results from requiring both or none...  But how to do that?  These area
               % guessed before constructors in particular because the prevent some bas constructor
               % guesses.
-              guessDeletingDestructor(Out);
-              guessRealDestructor(Out);
+              guessDeletingDestructor(Out),
+              guessRealDestructor(Out),
 
               % Constructors are very important guesses that can sometimes be reasoned soundly in the
               % presence of virtual function tables, but we often have to guess when there are not
               % tables.
-              guessConstructor(Out);
+              guessConstructor(Out),
 
               % This is a fairly solid rule that used to be forward reasoning until it was found to
               % be incorrect in certain rare cases.  It has to be before ClassHasNoBase because it
               % will cause confusion about embedded object versus inheritance if it's after.
-              guessNOTMergeClasses(Out);
+              guessNOTMergeClasses(Out),
 
               % This is a very important (and very speculative) guess that's required to make a lot of
               % forward progress. :-( It's a very likely source of backtracking.  Its relationship with
               % guessing constructors is very unclear.  We probably need to have a fairly complete set of
               % constructors to derive base class relationships which prevent bad no-base guesses.
-              guessClassHasNoBase(Out);
+              guessClassHasNoBase(Out),
 
               % Guess some less likely constructors after having finished reasoning through the likely
               % implications of the inheritance of the more likely constuctor guesses.
-              guessUnlikelyConstructor(Out);
+              guessUnlikelyConstructor(Out),
 
               % This guess was move to almost last because in the case of overlapping VFTables, there's a
               % lot of bad guesses that are very confusing.  Alternatively, we could choose not to make
@@ -497,27 +500,25 @@ guess :-
               % speculative guesses that do.  These guesses probably don't drive a lot of logic
               % currently, but could drive more later (we're currently lacking good rules limiting the
               % relationships between virtual methods).
-              guessVFTableEntry(Out);
+              guessVFTableEntry(Out),
 
               % This shuold probably be the very last guess because a lot of it is pretty arbitrary.
               % Alternatively we could break the different ways of proposing guesses into different rules
               % and make higher confidence guesses earlier and lower confidence guesses later.  Right
               % now, that's handled by clause ordering within this one rule, which precludes us from
               % splitting it up.
-              guessMergeClasses(Out);
+              guessMergeClasses(Out),
 
               % Only after we've merged all the methods into the classes should we take wild guesses
               % at real destructors.
-              guessFinalDeletingDestructor(Out);
+              guessFinalDeletingDestructor(Out),
               % RealDestructorChange! (uncomment next line and add semicolon above)
               %guessFinalRealDestructor(Out)
 
               % As the very last guess, explicitly guess factClassHasNoBase(Class) for any
               % class that we have not identified a base class for.
               guessCommitClassHasNoBase(Out)
-
-             )),
-
+]),
         (
             call(Out);
             (logdebug('guess: We have back-tracked to the call of '),
