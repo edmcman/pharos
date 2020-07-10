@@ -69,6 +69,7 @@ tuple_to_list((A,B), L) :-
 tuple_to_list(A, [A]).
 
 % Call all predicates in list
+% Basically the same as maplist(call, GoalList) with logging
 all(L) :-
     all_int(L).
 

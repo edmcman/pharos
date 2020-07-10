@@ -253,22 +253,24 @@ insanityEmbeddedAndNot :-
 
 :- table sanityChecks/0 as incremental.
 sanityChecks :-
-    not(insanityEmbeddedAndNot),
-    not(insanityConstructorAndRealDestructor),
-    %not(insanityVFTableOnTwoClasses),
-    not(insanityConstructorInVFTable),
-    not(insanityClassSizeInvalid),
-    not(insanityVFTableSizeInvalid),
-    not(insanityEmbeddedObjectLarger),
-    not(insanityObjectCycle),
-    %% not(insanityEmbeddedTrivialObjectCycle),
-    not(insanityMemberPastEndOfObject),
-    not(insanityBaseVFTableLarger),
-    not(insanityConstructorAndDeletingDestructor),
-    not(insanityInheritanceLoop),
-    %not(insanityInheritanceAfterNonInheritance),
-    not(insanityContradictoryMerges),
-    not(insanityTwoRealDestructorsOnClass).
+    possibly_concurrent_maplist(call, [
+                                    not(insanityEmbeddedAndNot),
+                                    not(insanityConstructorAndRealDestructor),
+                                    %not(insanityVFTableOnTwoClasses),
+                                    not(insanityConstructorInVFTable),
+                                    not(insanityClassSizeInvalid),
+                                    not(insanityVFTableSizeInvalid),
+                                    not(insanityEmbeddedObjectLarger),
+                                    not(insanityObjectCycle),
+                                    %% not(insanityEmbeddedTrivialObjectCycle),
+                                    not(insanityMemberPastEndOfObject),
+                                    not(insanityBaseVFTableLarger),
+                                    not(insanityConstructorAndDeletingDestructor),
+                                    not(insanityInheritanceLoop),
+                                    %not(insanityInheritanceAfterNonInheritance),
+                                    not(insanityContradictoryMerges),
+                                    not(insanityTwoRealDestructorsOnClass)
+                               ]).
 
 /* Local Variables:   */
 /* mode: prolog       */
