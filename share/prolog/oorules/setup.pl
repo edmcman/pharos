@@ -171,6 +171,7 @@ classArgs(factClassSizeLTE/2, 1).
 % ============================================================================================
 
 :- include(util).
+:- include(concurrent).
 :- include(logging_instrumentation).
 :- include(webstat_helper).
 :- include(initial).
