@@ -34,29 +34,29 @@ do_work(Coordinator) :-
     % is in.
     thread_get_message(work(WorkID, MyWork, WorkerAnswerVar)),
 
-    %format('My work: ~w~n', [MyWork]),
+    format('My work: ~w~n', [MyWork]),
 
     !,
 
     (transaction((
                         % Do work
-                        %format('WorkerAnswerVar in WorkerThread is ~w~n', WorkerAnswerVar),
+                        format('WorkerAnswerVar in WorkerThread is ~w~n', WorkerAnswerVar),
                         call(MyWork),
                         % Report success
                         %WorkerAnswerVar=CoordinatorAnswerVar,
-                        %format('WorkerAnswerVar is ~w~n', WorkerAnswerVar),
+                        format('WorkerAnswerVar is ~w~n', WorkerAnswerVar),
                         thread_send_message(Coordinator, success(Me, WorkID)),
-                        %format('Thread ~w waiting for a Msg~n', [Me]),
+                        format('Thread ~w waiting for a Msg~n', [Me]),
                         % Get instructions
                         thread_get_message(Msg),
-                        %format('Thread ~w received a Msg ~w~n', [Me, Msg]),
+                        format('Thread ~w received a Msg ~w~n', [Me, Msg]),
                         % Commit or rollback?
                         Msg = commit,
 			format('I am the best: ~w~n', MyWork)
                     )),
      %writeln('Success commit, yeah'),
-     thread_send_message(Coordinator, committed(WorkerAnswerVar))
-     %format('Threat ~w sent committed message to thread ~w~n', [Me, Coordinator])
+     thread_send_message(Coordinator, committed(WorkerAnswerVar)),
+     format('Threat ~w sent committed message to thread ~w~n', [Me, Coordinator])
      ;
     thread_send_message(Coordinator, failed(Me, WorkID))).
 
@@ -66,23 +66,26 @@ do_work_repeatedly(Coordinator) :-
     fail.
 
 coordinator_handle_msg(AnswerVar, GoalList, needwork(ThreadID)) :-
-    %format('Thread ~w needs work~n', [ThreadID]),
+    format('Thread ~w needs work~n', [ThreadID]),
     available_work(WorkID),
+    format('Available work ID ~w, but is there anything in the goal list?~n', WorkID),
+    format('Goal list '), writeln(GoalList),
     nth0(WorkID, GoalList, Work),
     !,
-    %format('Work ~w is available~n', [Work]),
+    format('Work ~w is available~n', [Work]),
     retract(available_work(WorkID)),
 
     thread_send_message(ThreadID, work(WorkID, Work, AnswerVar)).
 
 coordinator_handle_msg(_AnswerVar, _GoalList, needwork(_ThreadID)) :-
+    format('Checking no available work~n'),
     not(available_work(_WorkID)),
-    !.
-    %format('Thread ~w needs work but there is none!~n', [ThreadID]).
+    !,
+    format('Thread ~w needs work but there is none!~n', [_ThreadID]).
     % Do nothing.  The coordinator thread will exit.
 
 coordinator_handle_msg(_AnswerVar, _GoalList, success(ThreadID, WorkID)) :-
-    %format('~w was successful ~w!~n', [WorkID, AnswerVar]),
+    format('~w was successful ~w!~n', [WorkID, AnswerVar]),
 
     retractall(result(WorkID, _)),
     assert(result(WorkID, success)),
@@ -103,29 +106,29 @@ coordinator_check_waiting(Queue, AnswerVar) :-
 
     S = [BestID|_],
 
-    %format('Best ID: ~w~n', [BestID]),
+    format('Best ID: ~w~n', [BestID]),
 
     % We can mark any pending items above this as failed or successful so we skip them
     % XXX: What happens if someone is already working on this WorkID?
     forall((result(WorkID, pending), WorkID > BestID),
-           (%format('Marking WorkID ~w as obsolete~n', [WorkID]),
+           (format('Marking WorkID ~w as obsolete~n', [WorkID]),
             assert(result(WorkID, obsolete)),
             retractall(result(WorkID, pending)))),
 
     % Any waiting above N can be told to rollback.
     forall((waiting(ThreadID, WorkID), WorkID > BestID),
-           (%format('Telling ThreadID ~w to rollback for obsolete Work ID ~w~n', [ThreadID, WorkID]),
+           (format('Telling ThreadID ~w to rollback for obsolete Work ID ~w~n', [ThreadID, WorkID]),
             retractall(waiting(ThreadID, WorkID)),
             thread_send_message(ThreadID, rollback))),
 
     % If there are no pending below this, N is the best and needs to be committed.
     not((result(WorkID, pending), WorkID < BestID))
     ->
-        %format('Work ID ~w is the best!~n', [BestID]),
+        format('Work ID ~w is the best!~n', [BestID]),
         % This thread must be waiting
         waiting(ThreadID, BestID),
         thread_send_message(ThreadID, commit),
-        %format('Waiting for commit from thread ~w~n', [ThreadID]),
+        format('Waiting for commit from thread ~w~n', [ThreadID]),
 
         % Unify with the answer from the winner
         thread_get_message(Queue, committed(AnswerVar))
@@ -139,11 +142,11 @@ work_helper(ID, AnswerVar, Out) :- Out = (0 is ID mod 43, format('I won!!! ~w~n'
 
 coordinator(GoalList, Queue, AnswerVar) :-
 
-    %format('AnswerVar in coordinator ~w~n', AnswerVar),
+    format('AnswerVar in coordinator ~w~n', AnswerVar),
 
     repeat,
     once((thread_get_message(Queue, Msg),
-    %format('Received msg ~w~n', [Msg]),
+    format('Received msg ~w~n', [Msg]),
     coordinator_handle_msg(AnswerVar, GoalList, Msg))),
 
     (coordinator_check_waiting(Queue, AnswerVar) ->
