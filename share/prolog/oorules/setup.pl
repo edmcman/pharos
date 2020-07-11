@@ -222,7 +222,7 @@ retract_helper(X) :-
     once(incr_retract(X)).
 
 try_assert(X) :- X, !.
-try_assert(X) :- try_assert_real(X).
+try_assert(X) :- format('try_assert ~w~n', X), try_assert_real(X).
 try_assert_real(X) :- delta_con(numfacts, 1), trigger_hook(X), assert_helper(X).
 % If we try to assert a trigger_fact and it fails, ignore it.  The worst that happens is we
 % reason about the errant trigger which is no longer true.  We do need to fail to avoid creating a choice point when backtracking.
@@ -395,6 +395,7 @@ reasonForward :-
     % the reasoning because of once/1.
 
     % Go ahead and try_assert the fact.
+    format('Calling ~w~n', Out),
     call(Out).
 
 % Reason forward as many times as possible.  It's ok if we can't reason forward any more.  But

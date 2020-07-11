@@ -26,7 +26,7 @@ getNextY(NextY) :- get_flag(webstat_y, Y),
 
 :- else.
 
-reportStage(X) :- loginfo('Entering stage '), loginfo(X), loginfoln('.').
+reportStage(X). % :- loginfo('Entering stage '), loginfo(X), loginfoln('.').
 reportStage(X, _) :- reportStage(X).
 
 ws_init.

@@ -39,6 +39,8 @@ osetof(A, B, C) :-
     list_to_set(Cp, Cp2),
     (deterministicEnabled -> sort(Cp2, C); C = Cp2).
 
+:- assert(deterministicEnabled).
+
 minof(A, B) :-
     deterministicEnabled
     ->

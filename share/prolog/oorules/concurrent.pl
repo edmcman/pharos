@@ -51,7 +51,8 @@ do_work(Coordinator) :-
                         thread_get_message(Msg),
                         %format('Thread ~w received a Msg ~w~n', [Me, Msg]),
                         % Commit or rollback?
-                        Msg = commit
+                        Msg = commit,
+			format('I am the best: ~w~n', MyWork)
                     )),
      %writeln('Success commit, yeah'),
      thread_send_message(Coordinator, committed(WorkerAnswerVar))
@@ -181,7 +182,7 @@ find_earliest(AnswerVar, GoalList, Options) :-
 
                         jobs(Jobs, Options),
                         % bagof is tough to convince not to introduce fresh variables for AnswerVar
-                        findall(do_work_repeatedly(Queue), between(1, Jobs, _Num), Goals_),
+                        findall(do_work_repeatedly(Queue), between(1, 2, _Num), Goals_),
 
                         Goals = [coordinator(GoalList, Queue, AnswerVar)|Goals_]),
 
