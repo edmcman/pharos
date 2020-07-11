@@ -1,8 +1,11 @@
+:- dynamic concurrent/0.
+
 parallel :-
     assert(concurrent),
     seq.
 
 seq :-
+    (concurrent -> protocol('concurrent.log'); protocol('seq.log')),
     assert(logLevel(7)),
     ['report'],
     assert(rTTIEnabled),
