@@ -33,7 +33,7 @@ foreach(previous ${OOANALYZER_TEST_PREVIOUS})
   add_test(NAME "ooprolog_swi_test_${und_name}"
     COMMAND ${CMAKE_CURRENT_BINARY_DIR}/tests/ooanalyzer-test.py
     "--build-dir" ${CMAKE_BINARY_DIR} "--git-dir" ${CMAKE_SOURCE_DIR}
-    "--swi-path" "${SWIPL_PROGRAM}" -v -p -s ${tgt_name}
+    "--swi-path" "${SWIPL_PROGRAM}" -v -p -c -s ${tgt_name}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties("ooprolog_swi_test_${und_name}" PROPERTIES LABELS ooprolog)
 
