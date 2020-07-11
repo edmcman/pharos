@@ -1,0 +1,10 @@
+parallel :-
+    assert(concurrent),
+    seq.
+
+seq :-
+    assert(logLevel(7)),
+    ['report'],
+    assert(rTTIEnabled),
+    psolve('facts/oo.facts').
+
