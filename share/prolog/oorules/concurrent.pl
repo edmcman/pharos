@@ -1,6 +1,6 @@
 :- dynamic concurrent/0.
 
-:- assert(concurrent).
+%:- assert(concurrent).
 
 possibly_concurrent_maplist(Goal, GoalList) :-
     concurrent -> concurrent_maplist(Goal, GoalList)
