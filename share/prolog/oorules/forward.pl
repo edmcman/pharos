@@ -481,12 +481,13 @@ concludeNOTMergeClasses(Out) :-
 
 concludeMergeClasses(Out) :-
     reportFirstSeen('concludeMergeClasses'),
+    loginfoln('concludeMergeClasses'),
     %% minof((Class1, Class2),
     %%       (reasonMergeClasses(Class1, Class2),
     %%        not(dynFactNOTMergeClasses(Class1, Class2)))),
     reasonMergeClasses(Class1, Class2),
-    logtrace('factMergeClasses early('),
-    logtrace(Class1), logtraceln(Class2),
+    ((not(concurrent), Class1=4210489, Class2=4210758) -> writeln('Why did this one get returned?'); true),
+    format('factMergeClasses early(~16r, ~16r)~n', [Class1, Class2]),
     not(dynFactNOTMergeClasses(Class1, Class2)),
     loginfo('Concluding mergeClasses('),
     loginfo(Class1), loginfo(', '),
