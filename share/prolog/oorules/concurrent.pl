@@ -191,6 +191,7 @@ find_earliest(AnswerVar, GoalList, Options) :-
 
                        % Cleanup
                        (message_queue_destroy(Queue),
+                        retractall(available_work(_)),
                         retractall(result(_,_)),
                         retractall(waiting(_,_)))).
 
@@ -207,3 +208,7 @@ test(Max, AnswerVar) :-
 
     find_earliest(AnswerVar, GoalList).
 
+
+%% Local Variables:
+%% mode: prolog
+%% End:
