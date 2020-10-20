@@ -55,7 +55,7 @@ reasonPrimaryVFTableForClassFinal(V, C) :-
 % version of the rule is a bit nasty because we can't rely on multiple implementations of the
 % rule and tabling to give us just one answer...   I think.
 
-:- table classIdentifier/2 as opaque.
+:- table classIdentifier/2 as monotonic.
 
 classIdentifier(Method, ID) :-
     var(Method),
@@ -384,7 +384,7 @@ finalMethodProperty(Method, virtual, certain) :-
     % not be the most efficient thing to do here.
     factMethod(Method),
     once((symbolProperty(Method, virtual);
-          (factMethodInVFTable(_VFTable, _Offset, Method), not(symbolProperty(Method, virtual))))),
+          (reasonMethodInVFTable(_VFTable, _Offset, Method), not(symbolProperty(Method, virtual))))),
     find(Method, Class),
     not(worthlessClass(Class)),
     not(purecall(Method)).

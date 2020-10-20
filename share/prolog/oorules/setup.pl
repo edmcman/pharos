@@ -41,9 +41,9 @@
 
 % These facts are asserted and retracted dynamically as the analysis executes.
 
-:- dynamic factMethod/1 as incremental.
+:- dynamic factMethod/1 as incremental, monotonic.
 :- dynamic factNOTMethod/1 as incremental.
-:- dynamic factConstructor/1 as incremental.
+:- dynamic factConstructor/1 as incremental, monotonic.
 :- dynamic factNOTConstructor/1 as incremental.
 :- dynamic factRealDestructor/1 as incremental.
 :- dynamic factNOTRealDestructor/1 as incremental.
@@ -54,9 +54,9 @@
 :- dynamic factNOTVirtualFunctionCall/5 as incremental.
 :- dynamic factVFTable/1 as incremental.
 :- dynamic factNOTVFTable/1 as incremental.
-:- dynamic factVFTableWrite/4 as (incremental,abstract(0)).
+:- dynamic factVFTableWrite/4 as (incremental,monotonic,abstract(0)).
 :- dynamic factVFTableOverwrite/4 as incremental.
-:- dynamic factVFTableEntry/3 as incremental.
+:- dynamic factVFTableEntry/3 as incremental, monotonic.
 :- dynamic factNOTVFTableEntry/3 as incremental.
 :- dynamic factVFTableSizeGTE/2 as incremental.
 :- dynamic factVFTableSizeLTE/2 as incremental.
@@ -72,18 +72,13 @@
 :- dynamic factNOTDerivedClass/3 as incremental.
 :- dynamic factEmbeddedObject/3 as incremental.
 :- dynamic factNOTEmbeddedObject/3 as incremental.
-:- dynamic factClassSizeGTE/2 as incremental.
-:- dynamic factClassSizeLTE/2 as incremental.
+:- dynamic factClassSizeGTE/2 as incremental, monotonic.
+:- dynamic factClassSizeLTE/2 as incremental, monotonic.
 :- dynamic factClassHasNoBase/1 as incremental.
 :- dynamic factReusedImplementation/1 as incremental.
 :- dynamic factClassHasUnknownBase/1 as incremental.
 :- dynamic factNOTMergeClasses/2 as incremental.
 :- dynamic factClassCallsMethod/2 as incremental.
-
-% This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
-% putting it in a separate fact, we can make it a trigger-based fact that is maintained with
-% low overhead.
-:- dynamic factMethodInVFTable/3 as incremental.
 
 % ============================================================================================
 % Dynamically rewritten facts involving classes.
@@ -166,7 +161,7 @@ classArgs(factClassSizeLTE/2, 1).
 % ============================================================================================
 
 % Can I put this somewhere else?
-:- dynamic findint/2 as incremental.
+:- dynamic findint/2 as incremental, monotonic.
 
 % ============================================================================================
 % Other modules.
@@ -185,7 +180,10 @@ classArgs(factClassSizeLTE/2, 1).
 :- ensure_loaded(final).
 :- ensure_loaded(softcut).
 :- ensure_loaded(class).
-:- ensure_loaded(trigger).
+%:- ensure_loaded(trigger).
+:- dynamic trigger_fact/1.
+trigger_hook(_).
+concludeTrigger(_) :- fail.
 :- ensure_loaded(swihelp).
 
 % These predicates are just named differently in SWI Prolog.

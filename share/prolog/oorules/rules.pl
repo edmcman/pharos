@@ -1699,22 +1699,17 @@ reasonClassHasNoBaseSet(Set) :-
 :- table reasonClassHasUnknownBase/1 as incremental.
 :- table reasonClassHasUnknownBase_A/1 as incremental.
 :- table reasonClassHasUnknownBase_B/1 as incremental.
-% This was broken up into several triggered rules
-%:- table reasonClassHasUnknownBase_C/8 as incremental.
+:- table reasonClassHasUnknownBase_C1/4 as monotonic.
 :- table reasonClassHasUnknownBase_D/1 as incremental.
-
-% trigger
-%:- table reasonClassHasUnknownBase_E/3 as incremental.
+:- table reasonClassHasUnknownBase_E/3 as monotonic.
 
 reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
     or([reasonClassHasUnknownBase_A(Class),
         reasonClassHasUnknownBase_B(Class),
-        % in trigger.pl
-        %reasonClassHasUnknownBase_C(Class),
-        reasonClassHasUnknownBase_D(Class)
-      % in trigger.pl
-      %reasonClassHasUnknownBase_E(Class)
+        reasonClassHasUnknownBase_C1(Class, _, _, _),
+        reasonClassHasUnknownBase_D(Class),
+        reasonClassHasUnknownBase_E(Class, _, _)
       ]).
 
 % Because it is already known to be true.
@@ -2034,8 +2029,8 @@ reasonClassCallsMethod_F(Class, Method) :-
 % are not associated by an inheritance relationship.
 reasonReusedImplementation(Method) :-
     %possiblyReused(Method),
-    factMethodInVFTable(VFTable1, _Offset1, Method),
-    factMethodInVFTable(VFTable2, _Offset2, Method),
+    reasonMethodInVFTable(VFTable1, _Offset1, Method),
+    reasonMethodInVFTable(VFTable2, _Offset2, Method),
     iso_dif(VFTable1, VFTable2),
     find(VFTable1, Class1),
     find(VFTable2, Class2),
@@ -2147,11 +2142,11 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
     findVFTable(BaseVFTable, BaseClass),
 
     % Which has a Method
-    factMethodInVFTable(BaseVFTable, _Offset, Method),
+    reasonMethodInVFTable(BaseVFTable, _Offset, Method),
     not(purecall(Method)),
     not(factReusedImplementation(Method)),
 
-    % We don't have to check purecall because factMethodInVFTable does already
+    % We don't have to check purecall because reasonMethodInVFTable does already
 
     % Finally check that the base class and method class are not already the same.
     find(Method, MethodClass),
@@ -2427,8 +2422,8 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 :- table reasonNOTMergeClasses_C/2 as incremental.
 %:- table reasonNOTMergeClasses_D/2 as incremental.
 
-% trigger
-%:- table reasonNOTMergeClasses_E/6 as incremental.
+% has not/1
+:- table reasonNOTMergeClasses_E/6 as monotonic.
 :- table reasonNOTMergeClasses_F/2 as incremental.
 :- table reasonNOTMergeClasses_G/2 as incremental.
 %:- table reasonNOTMergeClasses_H/2 as incremental.
@@ -2437,15 +2432,13 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 :- table reasonNOTMergeClasses_K/2 as incremental.
 :- table reasonNOTMergeClasses_L/2 as incremental.
 
-% trigger
-%:- table reasonNOTMergeClasses_M/4 as incremental.
-% trigger
-%:- table reasonNOTMergeClasses_N/4 as incremental.
+:- table reasonNOTMergeClasses_M/4 as monotonic.
+:- table reasonNOTMergeClasses_N/4 as monotonic.
 
 :- table reasonNOTMergeClasses_O/2 as incremental.
 :- table reasonNOTMergeClasses_P/2 as incremental.
-:- table reasonNOTMergeClasses_Q/2 as incremental.
-:- table reasonNOTMergeClasses_Qhelper/2 as incremental.
+:- table reasonNOTMergeClasses_Q/4 as monotonic.
+:- table reasonNOTMergeClasses_Qhelper/3 as monotonic.
 :- table reasonNOTMergeClasses_R/2 as incremental.
 
 reasonNOTMergeClasses(M1,M2) :-
@@ -2459,22 +2452,18 @@ reasonNOTMergeClasses_new(M1,M2) :-
         %reasonNOTMergeClasses_B(M1,M2),
         reasonNOTMergeClasses_C(M1,M2),
         %reasonNOTMergeClasses_D(M1,M2),
-        % _E is now handled in trigger.pl
-        %reasonNOTMergeClasses_E(M1,M2),
+        reasonNOTMergeClasses_E(M1,M2,_,_,_,_),
         reasonNOTMergeClasses_F(M1,M2),
         reasonNOTMergeClasses_G(M1,M2),
         %reasonNOTMergeClasses_H(M1,M2),
         reasonNOTMergeClasses_I(M1,M2),
         reasonNOTMergeClasses_K(M1,M2),
         reasonNOTMergeClasses_L(M1,M2),
-        % _M is now handled in trigger.pl
-        %reasonNOTMergeClasses_M(M1,M2),
-        % _N is now handled in trigger.pl
-        %reasonNOTMergeClasses_N(M1,M2),
+        reasonNOTMergeClasses_M(M1,M2,_,_),
+        reasonNOTMergeClasses_N(M1,M2,_,_),
         reasonNOTMergeClasses_O(M1,M2),
         reasonNOTMergeClasses_P(M1,M2),
-        % _Q is now handled in trigger.pl
-        %reasonNOTMergeClasses_Q(M1,M2)
+        reasonNOTMergeClasses_Q(M1,M2,_,_),
         reasonNOTMergeClasses_R(M1,M2)
       ]).
 
