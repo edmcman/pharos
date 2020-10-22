@@ -41,9 +41,9 @@
 
 % These facts are asserted and retracted dynamically as the analysis executes.
 
-:- dynamic factMethod/1 as incremental, monotonic.
+:- dynamic factMethod/1 as (incremental, monotonic).
 :- dynamic factNOTMethod/1 as incremental.
-:- dynamic factConstructor/1 as incremental, monotonic.
+:- dynamic factConstructor/1 as (incremental, monotonic).
 :- dynamic factNOTConstructor/1 as incremental.
 :- dynamic factRealDestructor/1 as incremental.
 :- dynamic factNOTRealDestructor/1 as incremental.
@@ -56,7 +56,7 @@
 :- dynamic factNOTVFTable/1 as incremental.
 :- dynamic factVFTableWrite/4 as (incremental,monotonic,abstract(0)).
 :- dynamic factVFTableOverwrite/4 as incremental.
-:- dynamic factVFTableEntry/3 as incremental, monotonic.
+:- dynamic factVFTableEntry/3 as (incremental, monotonic).
 :- dynamic factNOTVFTableEntry/3 as incremental.
 :- dynamic factVFTableSizeGTE/2 as incremental.
 :- dynamic factVFTableSizeLTE/2 as incremental.
@@ -72,8 +72,8 @@
 :- dynamic factNOTDerivedClass/3 as incremental.
 :- dynamic factEmbeddedObject/3 as incremental.
 :- dynamic factNOTEmbeddedObject/3 as incremental.
-:- dynamic factClassSizeGTE/2 as incremental, monotonic.
-:- dynamic factClassSizeLTE/2 as incremental, monotonic.
+:- dynamic factClassSizeGTE/2 as (incremental, monotonic).
+:- dynamic factClassSizeLTE/2 as (incremental, monotonic).
 :- dynamic factClassHasNoBase/1 as incremental.
 :- dynamic factReusedImplementation/1 as incremental.
 :- dynamic factClassHasUnknownBase/1 as incremental.
@@ -161,7 +161,7 @@ classArgs(factClassSizeLTE/2, 1).
 % ============================================================================================
 
 % Can I put this somewhere else?
-:- dynamic findint/2 as incremental, monotonic.
+:- dynamic findint/2 as (incremental, monotonic).
 
 % ============================================================================================
 % Other modules.
