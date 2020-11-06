@@ -287,6 +287,7 @@ reasonNOTConstructor_D(Method) :-
 % ED_PAPER_INTERESTING
 reasonNOTConstructor_E(Method) :-
     factMethod(Method),
+    % NOT: opaque
     not(possibleConstructor(Method)),
     % Debugging
     logtraceln('~@~Q.', [not(factNOTConstructor(Method)), reasonNOTConstructor_E(Method)]).
@@ -313,6 +314,7 @@ reasonNOTConstructor_G(Method) :-
     % The caller is already known to have a VFTable write.
     factVFTableWrite(_Insn1, Caller, 0, _VFTable1),
     % But this method doesn't have the required write.
+    % NOT: opaque
     not(possibleVFTableWrite(_Insn2, Method, 0, _VFTable2)),
     %
     % Debugging
@@ -327,6 +329,7 @@ reasonNOTConstructor_H(Method) :-
     % There is a method on the class
     findMethod(Method, Class),
     % The method does not install the vftable
+    % NOT: opaque
     not(possibleVFTableWrite(_Insn, Method, _, VFTable)),
 
     logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
@@ -410,6 +413,7 @@ reasonNOTRealDestructor_C(Method) :-
 % PAPER: Order-NotDestructor
 reasonNOTRealDestructor_D(Method) :-
     factMethod(Method),
+    % NOT: opaque
     not(possibleDestructor(Method)).
 
 % Because a class can have only one real destructor and we've already one for this class.
@@ -445,6 +449,7 @@ reasonNOTRealDestructor_G(Method) :-
     % The caller is already known to have a VFTable write.
     factVFTableWrite(_Insn1, Caller, 0, _VFTable1),
     % But this method doesn't have the required write.
+    % NOT: opaque
     not(possibleVFTableWrite(_Insn2, Method, 0, _VFTable2)),
     % Debugging
     logtraceln('~@~Q.', [not(factNOTRealDestructor(Method)),
@@ -544,6 +549,7 @@ reasonNOTDeletingDestructor_C(Method) :-
 % PAPER: Order-NotDestructor
 reasonNOTDeletingDestructor_D(Method) :-
     factMethod(Method),
+    % NOT: opaque
     not(possibleDestructor(Method)).
 
 % Because a method on a class cannot _deallocate_ itself.
@@ -571,12 +577,14 @@ reasonNOTDeletingDestructor_F(Method) :-
     callingConvention(Method, '__thiscall'),
     funcParameter(Method, ecx, ThisPtr),
     % But we don't call delete on ourself
+    % NOT: facts
     not(insnCallsDelete(_Insn2, Method, ThisPtr)).
 
 % Deleting destructors are always virtual, so if we can't possibly be a virtual, then we can't
 % possibly be a deleting destructor.  The primary benefit of this rule compared to some others
 % is that is does not rely on the correct detection of delete() which is sometimes a problem.
 reasonNOTDeletingDestructor_G(Method) :-
+    % NOT: opaque
     not(possiblyVirtual(Method)).
 
 reasonNOTDeletingDestructorSet(Set) :-
@@ -615,10 +623,18 @@ certainConstructorOrDestructorButUndecided(Method) :-
     % We know it's one or the other
     certainConstructorOrDestructor(Method),
     % But haven't decided yet
+    % NOT: !!!
     not((factConstructor(Method); factNOTConstructor(Method))).
+
+% NOT: If factConstructor(Method) or factNOTConstructor become true, we are no longer undecided.
+neg(certainConstructorOrDestructorButUndecoded(Method)) :-
+    factConstructor(Method); factNOTConstructor(Method).
 
 mayHavePendingOverwrites(Method) :-
     certainConstructorOrDestructorButUndecided(Method).
+
+neg(mayHavePendingOverwrites(Method)) :-
+    neg(certainConstructorOrDestructorButUndecided(Method)).
 
 % ============================================================================================
 % Rules for virtual function tables, virtual function calls, etc.
@@ -733,6 +749,23 @@ reasonVFTableOverwrite(Method, VFTable2, VFTable1, Offset) :-
 
 :- table reasonVFTableBelongsToClass/5 as incremental.
 
+% NOT XXX: Do we need two versions of this?
+neg(reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite)) :-
+    find(Method, Class),
+    factVFTableWrite(Insn, Method, Offset, VFTable),
+
+    % NOT: If there are pending overwrites
+    (mayHavePendingOverwrites(Method);
+
+     % NOT: If VFTable is overwritten
+     factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset);
+
+     % NOT: For destructor rule only, there is another class installing the vftable and it is not overwritten
+     (Rule=destructor,
+      factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
+      find(Method2, OtherClass),
+      iso_dif(Class, OtherClass))).
+
 % Free, _, Bound
 reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     var(VFTable),
@@ -746,6 +779,8 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
     % are not produced when that happens.  So the following clause forces us to wait for that
     % decision to be made.
+
+    % NOT: Need to check
     not(mayHavePendingOverwrites(Method)),
 
     % ejs 9/13/20: If a factVFTableOverwrite exists, then the VFTable doesn't belong to this
@@ -755,6 +790,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
+    % NOT: Need to check
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
     % Constructors may inline embedded constructors.  If non-offset
@@ -764,7 +800,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
-    (Offset = 0 -> true; forall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
+    %(Offset = 0 -> true; forall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
+    % NOT: XXX
+    (Offset = 0 -> true; not(factVFTableWrite(_Insn2, _OtherMethod, 0, VFTable))),
 
     % Additional checks.  One of the following must be true...
     (
@@ -779,6 +817,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
         % more conservative.
         % ejs 9/13/20: We now use factConstructor anyway, so perhaps we could relax this.
         % ejs 10/9/20: Since we call not(mayHavePendingOverwrites(Method)) above, should we change this to factVFTableOverwrite?
+        % NOT: opaque
         (not(possibleVFTableOverwrite(_Insn3, _Insn4, Method, Offset, VFTable, _OtherVFTable)),
          % ejs 9/13/20: In mysqld.exe, we were using this rule to incorrectly associate
          % vftables with destructors before any determination about constructors or destructors
@@ -790,12 +829,18 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
         % Alternatively, if we are a destructor, make sure there is no other class trying to
         % install this vftable
         % XXX: Should Offset = Offset2?
-        (forall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
-               % It is ok to ignore overwritten vftables
-               (factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2);
-                % Otherwise it better be the same class
-                find(Method2, Class))),
+        % NOT: XXX
+        (not((factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
+             not(factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2)),
+             find(Method2, OtherClass),
+             iso_dif(Class, OtherClass))),
          Rule=destructor);
+        %% (forall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
+        %%        % It is ok to ignore overwritten vftables
+        %%        (factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2);
+        %%         % Otherwise it better be the same class
+        %%         find(Method2, Class))),
+        %%  Rule=destructor);
 
         % If Class has no base, then the VFTable installation we see must be the right one.
         (factClassHasNoBase(Class),
@@ -1233,6 +1278,7 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
+    % NOT: TBD
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
@@ -1271,6 +1317,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     % The hierarchy is length_error is a logic_error, which is an exception, but this rule
     % concludes that there's an exception in length_error, which is probably not what we
     % wanted.  This blocks that condition, but it's not clear that it does so optimally.
+    % NOT: TBD
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
@@ -1342,6 +1389,7 @@ reasonEmbeddedObject_C(Class, EmbeddedClass, Offset) :-
 % better due to testing explicitly true facts rather than using "not()".
 reasonEmbeddedObject_D(Class, EmbeddedClass, Offset) :-
     factObjectInObject(Class, EmbeddedClass, Offset),
+    % NOT: TBD
     not(factDerivedClass(Class, EmbeddedClass, Offset)),
     iso_dif(Offset, 0),
     factEmbeddedObject(Class, _, LowerOffset),
@@ -1426,6 +1474,7 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     % installs the vftable for std::exception with this rule, and conclude that
     % std::length_error also inherits from std::exception.  This rule doesn't have much value
     % if RTTI is available though, so in that case we just turn it off.
+    % NOT: fact
     not((rTTIEnabled, rTTIValid)),
 
     % Some instruction in the derived class constructor called the base class constructor.
@@ -1445,10 +1494,12 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     factVFTableWrite(_Insn1, DerivedConstructor, ObjectOffset, DerivedVFTable),
 
     % No one overwrites the vftable
+    % NOT: TBD
     not(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset)),
 
     ((factVFTableWrite(_Insn2, BaseConstructor, 0, BaseVFTable),
       % No one overwrites the vftable
+      % NOT: TBD
       not(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0)),
       % And the vtables values written were different
       iso_dif(DerivedVFTable, BaseVFTable));
@@ -1464,6 +1515,7 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     find(BaseConstructor, BaseClass),
 
     % There's not already a relationship.  (Prevent grand ancestors)
+    % NOT: TBD
     not(reasonClassRelationship(DerivedClass, BaseClass)),
 
     % Debugging
@@ -1623,6 +1675,7 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     factConstructor(DerivedConstructor),
 
     % The derived constructor does not write a vftable at offset 0
+    % NOT: TBD
     not(factVFTableWrite(_Insn, DerivedConstructor, 0, _DVFTable)),
 
     % The base class has a primary vftable
