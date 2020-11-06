@@ -123,6 +123,7 @@ guessVirtualFunctionCall(Out) :-
     reportFirstSeen('guessVirtualFunctionCall'),
     minof((Insn, Constructor, OOffset, VFTable, VOffset),
           (likelyVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
+           % NOT: needs checking
            not(factNOTConstructor(Constructor)),
            doNotGuessHelper(
                    factVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
@@ -230,6 +231,13 @@ prioritizedVFTableEntry(VFTable, Offset, Entry) :-
                      factNOTVFTableEntry(VFTable, Offset, Entry)).
 
 % First priority guess, when we already know Entry is an OO method.
+% XXX: Need to recall the positive rule?
+neg(guessVFTableEntry1(VFTable, Offset, Entry)) :-
+    guessVFTableEntry1(VFTable, Offset, Entry),
+
+    prioritizedVFTableEntry(VFTable, LargerOffset, _OtherEntry),
+    LargerOffset > Offset.
+
 guessVFTableEntry1(VFTable, Offset, Entry) :-
     % Choose a prioritized VFTable entry to guess.
     prioritizedVFTableEntry(VFTable, Offset, Entry),
@@ -246,6 +254,12 @@ guessVFTableEntry1(VFTable, Offset, Entry) :-
     not((prioritizedVFTableEntry(VFTable, LargerOffset, _OtherEntry), LargerOffset > Offset)).
 
 % Second priority guess, when we also have to guess that Entry is an OO method.
+neg(guessVFTableEntry2(VFTable, Offset, Entry)) :-
+    guessVFTableEntry2(VFTable, Offset, Entry),
+
+    prioritizedVFTableEntry(VFTable, LargerOffset, _OtherEntry),
+    LargerOffset > Offset.
+
 guessVFTableEntry2(VFTable, Offset, Entry) :-
     % Choose a prioritized VFTable entry to guess.
     prioritizedVFTableEntry(VFTable, Offset, Entry),
@@ -558,8 +572,10 @@ tryNOTMethod(Method) :-
 guessConstructor1(Method) :-
     factMethod(Method),
     possibleConstructor(Method),
+    % NOT: opaque
     not(possiblyVirtual(Method)),
     factVFTableWrite(_Insn, Method, _ObjectOffset, _VFTable2),
+    % NOT: facts
     not(uninitializedReads(Method)),
     doNotGuessHelper(factConstructor(Method),
                      factNOTConstructor(Method)).
@@ -576,6 +592,7 @@ guessConstructor(Out) :-
 guessConstructor2(Method) :-
     factMethod(Method),
     possibleConstructor(Method),
+    % NOT: opaque
     not(possiblyVirtual(Method)),
     factVFTableWrite(_Insn, Method, _ObjectOffset, _VFTable2),
     % We don't whether their were unitialized reads or not.  Presumably we called our parent
@@ -596,8 +613,10 @@ guessConstructor(Out) :-
 guessConstructor3(Method) :-
     factMethod(Method),
     possibleConstructor(Method),
+    % NOT: opaque
     not(possiblyVirtual(Method)),
     % This case is for constructors of non-virtual classes.
+    % NOT: fact
     not(uninitializedReads(Method)),
     doNotGuessHelper(factConstructor(Method),
                      factNOTConstructor(Method)).
@@ -615,6 +634,7 @@ guessConstructor(Out) :-
 guessConstructor4(Method) :-
     factMethod(Method),
     possibleConstructor(Method),
+    % NOT: opaque
     not(possiblyVirtual(Method)),
     % This case is for constructors of non-virtual classes with uninitalized reads.
     doNotGuessHelper(factConstructor(Method),
@@ -657,11 +677,19 @@ tryNOTConstructor(Method) :-
 % First guess constructors with a single VFTable write...  Because constructors with multiple
 % vftable writes are more likely to have base classes.
 % ED_PAPER_INTERESTING
+
+neg(guessClassHasNoBaseB(Class)) :-
+    factVFTableWrite(_Insn1, Constructor, 0, VFTable),
+    factVFTableWrite(_Insn2, Constructor, _Offset1, OtherVFTable),
+    iso_dif(VFTable, OtherVFTable),
+    find(Constructor, Class).
+
 guessClassHasNoBaseB(Class) :-
     factConstructor(Constructor),
     find(Constructor, Class),
 
     factVFTableWrite(_Insn1, Constructor, 0, VFTable),
+    % NOT: needs checking
     not((
                factVFTableWrite(_Insn2, Constructor, _Offset1, OtherVFTable),
                iso_dif(VFTable, OtherVFTable)
@@ -681,6 +709,10 @@ guessClassHasNoBase(Out) :-
 
 % Then guess classes regardless of their VFTable writes.
 % ED_PAPER_INTERESTING
+
+neg(guessClassHasNoBaseC(Class)) :-
+    factDerivedClass(Class, _BaseClass, _Offset).
+
 guessClassHasNoBaseC(Class) :-
     factConstructor(Constructor),
     find(Constructor, Class),
@@ -711,6 +743,10 @@ tryClassHasUnknownBase(Class) :-
 % This is also used to guess factClassHasNoBase, but is one of the last guesses made in the
 % system.  The idea is simply to guess factClassHasNoBase for any class that does not have an
 % identified base.
+
+neg(guessClassHasNoBaseSpecial(Class)) :-
+    factDerivedClass(Class, _Base, _Offset).
+
 guessClassHasNoBaseSpecial(Class) :-
     % Class is a class
     find(_, Class),
@@ -758,6 +794,9 @@ guessLateMergeClassesF2(Class, Method) :-
     findVFTable(VFTable, Class),
 
     checkMergeClasses(Class, Method).
+
+neg(guessLateMergeClassesF1(Class, _Method)) :-
+    factDerivedClass(Class, _BaseClass, _Offset).
 
 guessLateMergeClassesF1(Class, Method) :-
     guessLateMergeClassesF2(Class, Method),
@@ -809,6 +848,7 @@ guessNOTMergeClasses(OuterClass, InnerClass) :-
     find(OuterConstructor, OuterClass),
     iso_dif(OuterClass, InnerClass),
 
+    % NOT: fact
     not(uninitializedReads(InnerConstructor)),
 
     % We've not already concluded that they're different classes.
@@ -840,6 +880,7 @@ guessNOTMergeClasses(Out) :-
 % Ed: Why does it matter that there are two constructors?
 guessMergeClassesA(Class1, MethodClass) :-
     factMethod(Method),
+    % NOT: fact
     not(purecall(Method)), % Never merge purecall methods into classes.
     validFuncOffset(_Insn1, Constructor1, Method, 0),
     validFuncOffset(_Insn2, Constructor2, Method, 0),
@@ -880,13 +921,16 @@ guessMergeClasses(Out) :-
 :- table reasonMethodInVFTable/4 as monotonic.
 reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
     % If Entry is bound, make sure it is not a purecall
+    % NOT: fact
     (nonvar(Entry) -> not(purecall(Entry)); true),
 
     factVFTableEntry(VFTable, Offset, Entry),
 
     % Entry is definitely bound now, so check purecall
+    % NOT: fact
     not(purecall(Entry)),
     dethunk(Entry, Method),
+    % NOT: fact
     not(purecall(Method)).
 
 reasonMethodInVFTable(VFTable, Offset, Method) :-
@@ -894,9 +938,11 @@ reasonMethodInVFTable(VFTable, Offset, Method) :-
 
 guessMergeClassesB(Class1, Class2) :-
     factVFTableEntry(VFTable, _VFTableOffset, Entry1),
+    % NOT: fact
     not(purecall(Entry1)), % Never merge purecall methods into classes.
     dethunk(Entry1, Method1),
     factMethod(Method1),
+    % NOT: fact
     not(purecall(Method1)), % Never merge purecall methods into classes.
 
     % A further complication arose in this guessing heuristic.  It appears that if the method
@@ -906,6 +952,7 @@ guessMergeClassesB(Class1, Class2) :-
     % the wrong class, but it would be better to just assign it to the right class with a
     % strong reasoning rule.  We don't have one of those for this case yet because we don't
     % have the vftable for the method that's imported...
+    % NOT: fact
     not(symbolProperty(Method1, virtual)),
 
     find(Method1, Class1),
@@ -920,6 +967,7 @@ guessMergeClassesB(Class1, Class2) :-
     % support, Cory decided to allow the second entry to differ so long as it resolved to the
     % same place.  It's unclear if this is really correct.
 
+    % NOT: TBD ???
     forall(reasonMethodInVFTable(OtherVFTable, _Offset, Method1),
            findVFTable(OtherVFTable, Class2)),
 
@@ -948,11 +996,13 @@ guessMergeClasses(Out) :-
 guessMergeClassesC1(DerivedClass, CalledClass) :-
     % A derived class calls a method
     factClassCallsMethod(DerivedClass, CalledMethod),
+    % NOT: fact
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
 
     % The called method does NOT install any vftables that are on the base class.
+    % NOT: XXX Needs checking
     not((
                find(BaseVFTable, BaseClass),
                factVFTableWrite(_Insn, CalledMethod, Offset, BaseVFTable)
@@ -988,6 +1038,7 @@ guessMergeClasses(Out) :-
 % If the called method installs a base VFTable, guess that the method belongs on the base class.
 guessMergeClassesC2(BaseClass, CalledClass) :-
     factClassCallsMethod(DerivedClass, CalledMethod),
+    % NOT: fact
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1011,6 +1062,7 @@ guessMergeClasses(Out) :-
 % If we haven't made a guess about the called method, guess that it is on the derived class.
 guessMergeClassesC3(DerivedClass, CalledClass) :-
     factClassCallsMethod(DerivedClass, CalledMethod),
+    % NOT: fact
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1029,6 +1081,7 @@ guessMergeClasses(Out) :-
 % If we still haven't made a guess about the called method, guess that it is on the base class.
 guessMergeClassesC4(BaseClass, CalledClass) :-
     factClassCallsMethod(BaseClass, CalledMethod),
+    % NOT: fact
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1048,8 +1101,10 @@ guessMergeClasses(Out) :-
 % ED_PAPER_INTERESTING
 guessMergeClassesE(Class1, Class2) :-
     factClassCallsMethod(Class1, Method),
+    % NOT: fact
     not(purecall(Method)), % Never merge purecall methods into classes.
     % Same reasoning as in guessMergeClasses_B...
+    % NOT: fact
     not(symbolProperty(Method, virtual)),
     find(Method, Class2),
     checkMergeClasses(Class1, Class2),
@@ -1093,6 +1148,7 @@ guessMergeClassesG(Class1, Class2) :-
     setof(Class,
           Insn2^Offset2^Method2^(
               factVFTableWrite(Insn2, Method2, Offset2, VFTable),
+              % NOT: XXX TBD
               not(factVFTableOverwrite(Method2, _OtherVFTable, VFTable, Offset2)),
               find(Method2, Class),
               iso_dif(Class1, Class)),
@@ -1390,6 +1446,7 @@ likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
     % This indicates that the method met some basic criteria in C++.
     possibleDestructor(DeletingDestructor),
     % That's not already certain to NOT be a deleting destructor.
+    % NOT: XXX TBD
     not(factNOTDeletingDestructor(DeletingDestructor)),
     % And the deleting destructor must also call delete (we think), since that's what makes it
     % deleting.  Using this instead of the more complicated rule below led toa very slight
