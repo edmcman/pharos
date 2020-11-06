@@ -862,6 +862,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
     % are not produced when that happens.  So the following clause forces us to wait for that
     % decision to be made.
+    % NOT: Needs checking
     not(mayHavePendingOverwrites(Method)),
 
     % ejs 9/13/20: If a factVFTableOverwrite exists, then the VFTable doesn't belong to this
@@ -871,6 +872,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
+    % NOT: Needs checking
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
     % Constructors may inline embedded constructors.  If non-offset
@@ -895,6 +897,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
         % more conservative.
         % ejs 9/13/20: We now use factConstructor anyway, so perhaps we could relax this.
         % ejs 10/9/20: Since we call not(mayHavePendingOverwrites(Method)) above, should we change this to factVFTableOverwrite?
+        % NOT: Opaque
         (not(possibleVFTableOverwrite(_Insn3, _Insn4, Method, Offset, VFTable, _OtherVFTable)),
          % ejs 9/13/20: In mysqld.exe, we were using this rule to incorrectly associate
          % vftables with destructors before any determination about constructors or destructors
@@ -906,6 +909,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
         % Alternatively, if we are a destructor, make sure there is no other class trying to
         % install this vftable
         % XXX: Should Offset = Offset2?
+	% NOT: Need to rewrite as not, needs checking
         (forall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
                % It is ok to ignore overwritten vftables
                (factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2);
@@ -1278,12 +1282,15 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
-    % NOT: TBD
+    % NOT: Needs check
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_D(OuterClass, InnerClass, Offset)]).
+
+neg(reasonObjectInObject_D(OuterClass, InnerClass, Offset)) :-
+    reasonClassRelationship(OuterClass, InnerClass).
 
 % Because the outer constructor explicitly calls the inner constructor on that offset.
 % PAPER: Relate-1
@@ -1317,12 +1324,15 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     % The hierarchy is length_error is a logic_error, which is an exception, but this rule
     % concludes that there's an exception in length_error, which is probably not what we
     % wanted.  This blocks that condition, but it's not clear that it does so optimally.
-    % NOT: TBD
+    % NOT: Needs check
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
+
+neg(reasonObjectInObject_E(OuterClass, InnerClass, Offset)) :-
+    reasonClassRelationship(OuterClass, InnerClass).
 
 % The member at Offset in OuterConstructor is certain to be an object instance of class
 % InnerConstructor.  The reasoning was intended to be based on two different constructors
@@ -1389,11 +1399,14 @@ reasonEmbeddedObject_C(Class, EmbeddedClass, Offset) :-
 % better due to testing explicitly true facts rather than using "not()".
 reasonEmbeddedObject_D(Class, EmbeddedClass, Offset) :-
     factObjectInObject(Class, EmbeddedClass, Offset),
-    % NOT: TBD
+    % NOT: Needs check
     not(factDerivedClass(Class, EmbeddedClass, Offset)),
     iso_dif(Offset, 0),
     factEmbeddedObject(Class, _, LowerOffset),
     LowerOffset < Offset.
+
+neg(reasonEmbeddedObject_D(Class, EmbeddedClass, Offset)) :-
+    factDerivedClass(Class, EmbeddedClass, Offset).
 
 % Because there's a member before this one that's not an object.  In other words, there's an
 % ordinary member before this object, which means that it can't be inheritance, because base
@@ -1465,6 +1478,19 @@ reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset) :-
 % VFTable writes are to the same location is provided by the pointer math in validFuncOffset,
 % paried with the appropriatte offsets in the VFTable writes.
 
+neg(reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset)) :-
+    factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset),
+    find(DerivedConstructor, DerivedClass),
+    find(BaseConstructor, BaseClass).
+
+neg(reasonDerivedClass_B(_DerivedClass, BaseClass, ObjectOffset)) :-
+    ObjectOffset=0,
+    factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, ObjectOffset),
+    find(BaseConstructor, BaseClass).
+
+neg(reasonDerivedClass_B(DerivedClass, BaseClass, _ObjectOffset)) :-
+    reasonClassRelationship(DerivedClass, BaseClass).
+
 % PAPER: Relate-3
 % ED_PAPER_INTERESTING
 reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
@@ -1494,12 +1520,12 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     factVFTableWrite(_Insn1, DerivedConstructor, ObjectOffset, DerivedVFTable),
 
     % No one overwrites the vftable
-    % NOT: TBD
+    % NOT: Needs check
     not(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset)),
 
     ((factVFTableWrite(_Insn2, BaseConstructor, 0, BaseVFTable),
       % No one overwrites the vftable
-      % NOT: TBD
+      % NOT: Needs check
       not(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0)),
       % And the vtables values written were different
       iso_dif(DerivedVFTable, BaseVFTable));
@@ -1515,7 +1541,7 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     find(BaseConstructor, BaseClass),
 
     % There's not already a relationship.  (Prevent grand ancestors)
-    % NOT: TBD
+    % NOT: needs check
     not(reasonClassRelationship(DerivedClass, BaseClass)),
 
     % Debugging
@@ -1666,6 +1692,12 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
 % class that did have virtual functions. However, I would expect that the compiler would choose
 % the class with the virtual functions as the first base class in that case as a clear
 % performance optimization.
+
+% XXX: Only applies to last rule
+neg(reasonNOTDerivedClass_C(DerivedClass, _BaseClass, _ObjectOffset)) :-
+    factVFTableWrite(_Insn, DerivedConstructor, 0, _DVFTable),
+    find(DerivedConstructor, DerivedClass).
+
 reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
 
     % There is embedding or inheritance at non-offset 0
@@ -1675,7 +1707,7 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     factConstructor(DerivedConstructor),
 
     % The derived constructor does not write a vftable at offset 0
-    % NOT: TBD
+    % NOT: Needs check
     not(factVFTableWrite(_Insn, DerivedConstructor, 0, _DVFTable)),
 
     % The base class has a primary vftable
@@ -1948,6 +1980,13 @@ reasonClassCallsMethod(Class, Method) :-
 % same object pointer, and does not account for inheritance relationships.  Cory and Ed
 % discussed changing it into a guessing rule that guesses the direction of the relationship.
 % PAPER: Call-1
+
+% XXX: Is this use of find/2 ok?
+neg(reasonClassCallsMethod_A(Class1, Method2)) :-
+    thisPtrUsage(_, Function, ThisPtr, Method2),
+    find(Function, FunctionClass),
+    factObjectInObject(FunctionClass, Class1, 0).
+
 reasonClassCallsMethod_A(Class1, Method2) :-
     thisPtrUsage(_, Function, ThisPtr, Method1),
     thisPtrUsage(_, Function, ThisPtr, Method2),
@@ -1960,6 +1999,8 @@ reasonClassCallsMethod_A(Class1, Method2) :-
     % Function could be a derived constructor calling Method1 (a base constructor) and Method2
     % (a method on Function's class).  This incorrectly concludes that Method2 is called from
     % Method1 unless it is blocked by a clause like this...  but what is really correct here?
+
+    % NOT: Needs checking
     not((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
 
     % Functions that are methods can call base methods
@@ -1976,6 +2017,7 @@ reasonClassCallsMethod_B(Class1, Method2) :-
     % And the method is in that virtual function table.
     factVFTableEntry(VFTable, _TableOffset, Entry2),
     dethunk(Entry2, Method2),
+    % NOT: fact
     not(purecall(Entry2)), % Never merge purecall methods into classes.
     not(purecall(Method2)), % Never merge purecall methods into classes.
     % Don't propose assignments we already know.
@@ -2078,6 +2120,20 @@ reasonClassCallsMethod_F(Class, Method) :-
 % the inappropriate class merges that it is designed to block, but it seems to work right now.
 :- table reasonReusedImplementation/1 as incremental.
 
+% XXX: This is almost the whole rule in a different order!  Maybe the rule needs to take more arguments?
+neg(reasonReusedImplementation_A(Method)) :-
+    (reasonClassRelationship(Class1, Class2);
+     reasonClassRelationship(Class2, Class1)),
+    iso_dif(Class1, Class2),
+
+    findVFTable(VFTable1, Class1),
+    findVFTable(VFTable2, Class2),
+    iso_dif(VFTable1, VFTable2),
+
+    reasonMethodInVFTable(VFTable1, _Offset1, Method),
+    reasonMethodInVFTable(VFTable2, _Offset2, Method).
+
+
 % Because there's a trivial function that occurs in two tables where we know that the classes
 % are not associated by an inheritance relationship.
 reasonReusedImplementation(Method) :-
@@ -2088,6 +2144,7 @@ reasonReusedImplementation(Method) :-
     find(VFTable1, Class1),
     find(VFTable2, Class2),
     iso_dif(Class1, Class2),
+    % NOT: Needs checking
     not((
                reasonClassRelationship(Class1, Class2);
                reasonClassRelationship(Class2, Class1)
@@ -2187,6 +2244,10 @@ reasonMergeClasses(C,M) :-
 % of reasonMergeClasses_F.
 
 % Because the method occurs in a VFTable of a class that has no base.
+neg(reasonMergeClasses_B(_BaseClass, MethodClass)) :-
+    factReusedImplementation(Method),
+    find(Method, MethodClass).
+
 reasonMergeClasses_B(BaseClass, MethodClass) :-
     % There's a base class that has no base of it's own.
     factClassHasNoBase(BaseClass),
@@ -2196,7 +2257,9 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
 
     % Which has a Method
     reasonMethodInVFTable(BaseVFTable, _Offset, Method),
+    % NOT: fact
     not(purecall(Method)),
+    % NOT: Needs checking
     not(factReusedImplementation(Method)),
 
     % We don't have to check purecall because reasonMethodInVFTable does already
@@ -2217,12 +2280,21 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
 % rule to be correct we also need to exclude embedded objects at offset zero.  There's still
 % confusion about whether we already know whether it's embedded or
 % PAPER: Merging-2
+
+neg(reasonMergeClasses_C(Class, _ExistingClass)) :-
+    factObjectInObject(Class, _0InnerClass, 0).
+
+neg(reasonMergeClasses_C(_Class, ExistingClass)) :-
+    factObjectInObject(ExistingClass, _0InnerClass, 0),
+
 reasonMergeClasses_C(Class, ExistingClass) :-
     factClassCallsMethod(Class, Method),
+    % NOT: fact
     not(purecall(Method)), % Never merge purecall methods into classes.
     % If we have no bases, it can't be on a base class.
     factClassHasNoBase(Class),
     % And if there's no object (embedded or base?) at offset zero...
+    % NOT: Needs checking
     not(factObjectInObject(Class, _0InnerClass, 0)),
 
     find(Method, ExistingClass),
@@ -2230,6 +2302,7 @@ reasonMergeClasses_C(Class, ExistingClass) :-
     % Confusingly, the method's class must also have no base and no object at offset zero,
     % because the method being called could actually be the base class method...
     factClassHasNoBase(ExistingClass),
+    % NOT: Needs checking
     not(factObjectInObject(ExistingClass, _0InnerClass, 0)),
 
     % Debugging
@@ -2246,6 +2319,11 @@ reasonMergeClasses_C(Class, ExistingClass) :-
 % class constructor).
 % PAPER: Merging-1
 % ED_PAPER_INTERESTING
+
+neg(reasonMergeClasses_D(Class1, Class2)) :-
+    reasonClassRelationship(Class1, Class2);
+    reasonClassRelationship(Class2, Class1).
+
 reasonMergeClasses_D(Class1, Class2) :-
     % We've been back and forth several times about whether the object offset that the VFTable
     % address is written into should bound to zero or not.  Cory currently believes that while
@@ -2279,6 +2357,7 @@ reasonMergeClasses_D(Class1, Class2) :-
     % Unfortunately, because there's no way to "disprove" the possible facts, we'll never apply
     % this rule if the possibilty of an exception exists.  That's ok because we can always
     % merge for other proven reasons, or guess that this is a legitimate class merge.
+    % NOT: opaque
     not(possibleVFTableOverwrite(Insn1, _OtherInsn2, Method1, ObjectOffset, VFTable, _OtherVFTable1)),
 
     factVFTableWrite(Insn2, Method2, ObjectOffset, VFTable),
@@ -2288,6 +2367,7 @@ reasonMergeClasses_D(Class1, Class2) :-
 
     factConstructor(Method2),
 
+    % NOT: opaque
     not(possibleVFTableOverwrite(Insn2, _OtherInsn3, Method2, ObjectOffset, VFTable, _OtherVFTable2)),
 
     % And the existing classes are not the same already, which is obviously wrong...
@@ -2298,6 +2378,7 @@ reasonMergeClasses_D(Class1, Class2) :-
 
     % Also ensure that the two methods not in a class relationship already.  Merging them would
     % ultimately result in merging a class with it's own ancestor.
+    % NOT: Needs checking
     not((
                reasonClassRelationship(Class1, Class2);
                reasonClassRelationship(Class2, Class1)
@@ -2361,6 +2442,16 @@ reasonMergeClasses_G(Class1, Class2) :-
 % Because additional methods in our VFTable must be ours.
 % PAPER: Merging-17
 % ED_PAPER_INTERESTING
+
+neg(reasonMergeClasses_H(DerivedClass, MethodClass)) :-
+    factDerivedClass(DerivedClass, Base1, _Offset)
+    factDerivedClass(DerivedClass, Base2, _OtherOffset),
+    iso_dif(Base1, Base2).
+
+neg(reasonMergeClasses_H(DerivedClass, MethodClass)) :-
+    factReusedImplementation(Method),
+    find(Method, MethodClass).
+
 reasonMergeClasses_H(DerivedClass, MethodClass) :-
     % There's a derived and base class, each with vftables.
     factDerivedClass(DerivedClass, BaseClass, _ObjectOffset),
@@ -2370,6 +2461,7 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     % need to sum the sizes of the base class vftables, be confident in their layout order, and
     % no that there aren't any other complexities involving multiple inheritance.  In the mean
     % time, just disable this rule where there's more than one base class.
+    % NOT: Needs checking
     not((factDerivedClass(DerivedClass, OtherBase, _OtherOffset), iso_dif(OtherBase, BaseClass))),
 
     findVFTable(DerivedVFTable, 0, DerivedClass),
@@ -2378,7 +2470,9 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     factVFTableSizeLTE(BaseVFTable, BaseSize),
     % There's an entry in the derived vftable that's to big to be in the base vftable.
     factVFTableEntry(DerivedVFTable, VOffset, Method),
+    % NOT: fact
     not(purecall(Method)),
+    % NOT: Needs checking
     not(factReusedImplementation(Method)),
     VOffset > BaseSize,
     find(Method, MethodClass),
